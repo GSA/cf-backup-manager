@@ -7,8 +7,8 @@ build:
 test:
 	docker-compose run --rm app test/bats/bin/bats -r -p test/*.bats
 
-publish:
-	docker build . -t grch.io
+production:
+	docker build . -t ghcr.io/gsa/cf-backup-manager:latest
 
 
 .PHONY: test

@@ -1,11 +1,16 @@
-# datagov-backup
+# cf-backup-manager
 
-Service to automate backup and restore of data.gov back end services.
+Cloud Foundry application to automate backup and restore of application back end data services.
 
-## TODO
+## Publishing the image
 
-- [ ] parse vcap services from environment
-- [ ] handle different postgres versions (pg apt repository)
+The Cloud Foundry application uses a docker image published to this repository.
+New images are published on any push to `main` via GitHub Actions. Make sure
+these secrets are configured.
+
+Secret | Description
+------ | -----------
+GITHUB_TOKEN | A GH personal access token with scope `write:packages`. |
 
 ## Contributing
 
