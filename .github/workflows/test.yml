@@ -1,0 +1,12 @@
+---
+name: test
+
+on: push
+
+jobs:
+  bats:
+    name: bats
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout
+      - run: make test

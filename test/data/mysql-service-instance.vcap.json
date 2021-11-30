@@ -1,0 +1,25 @@
+{
+  "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
+  "binding_name": null,
+  "credentials": {
+    "db_name": "application",
+    "host": "mysql-host",
+    "name": "application",
+    "password": "mysql-password",
+    "port": "3306",
+    "uri": "mysql://app:mysql-password@mysql-host:3306/application",
+    "username": "app"
+  },
+  "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
+  "instance_name": "application-db",
+  "label": "aws-rds",
+  "name": "application-db",
+  "plan": "small-mysql",
+  "provider": null,
+  "syslog_drain_url": null,
+  "tags": [
+    "database",
+    "RDS"
+  ],
+  "volume_mounts": []
+}

@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+source $PROJECT_DIR/lib/core.bash
+
+# Load backup-manager-s3 creds
+get_service_instance "$DATASTORE_S3_SERVICE_NAME" <<<$VCAP_SERVICES > "$(env_file datastore_s3_metadata)"
+get_datastore_bucket_credentials_env "$(env_file datastore_s3_metadata)" > "$(env_file datastore_s3_credentials)"
+source "$(env_file datastore_s3_credentials)"
+
+bucket_path="${1:-}"
+bucket_path="${bucket_path#/}" # Remove starting /
+
+AWS_ACCESS_KEY_ID=$DATASTORE_BUCKET_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DATASTORE_BUCKET_SECRET_ACCESS_KEY aws_cmd s3 ls s3://${DATASTORE_BUCKET_NAME}/${bucket_path}

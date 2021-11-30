@@ -1,0 +1,14 @@
+---
+applications:
+  - name: datastore-backup
+    instances: 0
+    docker:
+      image: docker.io/adborden/cf-datastore-backup
+    command: sleep 3600
+    health-check-type: process
+    no-route: true
+    environment:
+      - AWS_DEFAULT_REGION=us-gov-west-1
+    services:
+      - datastore-backups
+      - dashboard-db

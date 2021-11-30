@@ -1,0 +1,57 @@
+{
+  "aws-rds": [
+    {
+      "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
+      "binding_name": null,
+      "credentials": {
+        "db_name": "application",
+        "host": "mysql",
+        "name": "application",
+        "password": "mysql-password",
+        "port": "5432",
+        "uri": "mysql://mysql:mysql-password@mysql:3306/application",
+        "username": "app"
+      },
+      "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
+      "instance_name": "application-db",
+      "label": "aws-rds",
+      "name": "application-db",
+      "plan": "small-mysql",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "database",
+        "RDS"
+      ],
+      "volume_mounts": []
+    }
+  ],
+  "s3": [
+    {
+      "label": "s3",
+      "provider": null,
+      "plan": "basic-sandbox",
+      "name": "datastore-backup-test-s3",
+      "tags": [
+        "AWS",
+        "S3",
+        "object-storage"
+      ],
+      "instance_guid": "5a6f8b66-af7e-473a-bb5b-7c347d8fa164",
+      "instance_name": "datastore-backup-test-s3",
+      "binding_guid": "c74e306b-c02a-43be-877f-76b860b69dac",
+      "binding_name": null,
+      "credentials": {
+        "uri": "s3://minio:miniopassword@s3-us-gov-west-1.amazonaws.com/datastore-backup-test",
+        "access_key_id": "minio",
+        "secret_access_key": "miniopassword",
+        "region": "us-gov-west-1",
+        "bucket": "datastore-backup-test",
+        "fips_endpoint": "s3-fips.us-gov-west-1.amazonaws.com",
+        "additional_buckets": []
+      },
+      "syslog_drain_url": null,
+      "volume_mounts": []
+    }
+  ]
+}

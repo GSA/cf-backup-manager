@@ -1,0 +1,26 @@
+{
+  "label": "s3",
+  "provider": null,
+  "plan": "basic-sandbox",
+  "name": "backup-s3",
+  "tags": [
+    "AWS",
+    "S3",
+    "object-storage"
+  ],
+  "instance_guid": "5a6f8b66-af7e-473a-bb5b-7c347d8fa164",
+  "instance_name": "backup-s3",
+  "binding_guid": "c74e306b-c02a-43be-877f-76b860b69dac",
+  "binding_name": null,
+  "credentials": {
+    "uri": "s3://minio:miniopassword@s3-us-gov-west-1.amazonaws.com/datastore-backup",
+    "access_key_id": "minio",
+    "secret_access_key": "miniopassword",
+    "region": "us-gov-west-1",
+    "bucket": "datastore-backup",
+    "fips_endpoint": "s3-fips.us-gov-west-1.amazonaws.com",
+    "additional_buckets": []
+  },
+  "syslog_drain_url": null,
+  "volume_mounts": []
+}
