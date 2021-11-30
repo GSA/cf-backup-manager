@@ -19,7 +19,8 @@ function test_fixture () {
 
 
 @test "get_service_instance application-db is found" {
-  run get_service_instance application-db < $(test_fixture example.vcap.json)
+  VCAP_SERVICES="$(cat $(test_fixture example.vcap.json))"
+  run get_service_instance application-db
 
   assert_success
   assert_output - <<EOF
@@ -52,19 +53,17 @@ EOF
 }
 
 @test "get_service_instance nonexist-db is not found" {
-  run get_service_instance nonexist-db < $(test_fixture example.vcap.json)
+  VCAP_SERVICES="$(cat $(test_fixture example.vcap.json))"
+  run get_service_instance nonexist-db
+
   assert_failure
   assert_output ""
 }
 
-@test "get_service_label_plan given mysql service instance, returns aws-rds small-mysql" {
-  run get_service_label_plan < $(test_fixture mysql-service-instance.vcap.json)
-  assert_success
-  assert_output "aws-rds small-mysql"
-}
-
 @test "get_datastore_bucket_credentials_env" {
-  run get_datastore_bucket_credentials_env $(test_fixture datastore-s3.vcap.json)
+  VCAP_SERVICES="$(cat $(test_fixture datastore-s3.vcap.json))"
+  DATASTORE_S3_SERVICE_NAME=backup-s3
+  run get_datastore_bucket_credentials_env
 
   assert_success
   assert_output - <<EOF

@@ -8,7 +8,7 @@
         "host": "mysql",
         "name": "application",
         "password": "mysql-password",
-        "port": "5432",
+        "port": "3306",
         "uri": "mysql://mysql:mysql-password@mysql:3306/application",
         "username": "app"
       },

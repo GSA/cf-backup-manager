@@ -7,8 +7,8 @@ set -o nounset
 source $PROJECT_DIR/lib/core.bash
 
 # Load backup-manager-s3 creds
-get_service_instance "$DATASTORE_S3_SERVICE_NAME" <<<$VCAP_SERVICES > "$(env_file datastore_s3_metadata)"
-get_datastore_bucket_credentials_env "$(env_file datastore_s3_metadata)" > "$(env_file datastore_s3_credentials)"
+get_service_instance "$DATASTORE_S3_SERVICE_NAME" > "$(env_file datastore_s3_metadata)"
+get_datastore_bucket_credentials_env > "$(env_file datastore_s3_credentials)"
 source "$(env_file datastore_s3_credentials)"
 
 bucket_path="${1:-}"

@@ -42,14 +42,14 @@ function main () {
   # Get credentials for the datastore S3 bucket
   local datastore_s3_credentials=$DATA_DIR/datastore_s3_credentials
   local datastore_s3_metadata=$DATA_DIR/datastore_s3_metadata
-  get_service_instance "$DATASTORE_S3_SERVICE_NAME" <<< "$VCAP_SERVICES" > "$datastore_s3_metadata"
+  get_service_instance "$DATASTORE_S3_SERVICE_NAME" > "$datastore_s3_metadata"
   [ -s "$datastore_s3_metadata" ] || fail "Error: DATASTORE_S3_SERVICE_NAME=$DATASTORE_S3_SERVICE_NAME could not be found in VCAP_SERVICES."
-  get_datastore_bucket_credentials_env "$datastore_s3_metadata" > "$datastore_s3_credentials"
+  get_datastore_bucket_credentials_env > "$datastore_s3_credentials"
   source "$datastore_s3_credentials"
 
   # Get metadata for the target service
   service_metadata=$DATA_DIR/service_metadata
-  get_service_instance "$service_name" <<< "$VCAP_SERVICES" > "$service_metadata"
+  get_service_instance "$service_name" > "$service_metadata"
   [ -s "$service_metadata" ] || fail "Error: service=$service_name could not be found in VCAP_SERVICES."
 
   time (
@@ -61,7 +61,7 @@ function main () {
 
     # Get credentials for the target service
     service_credentials=$DATA_DIR/credentials
-    service_get_credentials_env "$service_metadata" > "$service_credentials"
+    service_get_credentials_env "$service_name" > "$service_credentials"
 
     source "$datastore_s3_credentials"
     cat "$datastore_s3_credentials"

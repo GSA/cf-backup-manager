@@ -6,15 +6,7 @@
 #   JSON metadata for the named VCAP service
 function get_service_instance () {
   local service_name=$1
-  jq -e ".[][] | select(.instance_name==\"${service_name}\")"
-}
-
-# Prints the label and plan, separated by space
-# stdin: Single VCAP service instance metadata
-# stdout:
-#   Output service label and plan e.g. "aws-rds small-psql"
-function get_service_label_plan () {
-  jq --raw-output '[.label, .plan] | join(" ")'
+  jq -e ".[][] | select(.instance_name==\"${service_name}\")" <<< "$VCAP_SERVICES"
 }
 
 # Prints the service type
@@ -24,12 +16,13 @@ function get_service_type () {
 
 # Prints S3 bucket credentials for environment
 function get_datastore_bucket_credentials_env () {
-  local service_metadata="$1"
+  [[ -z "$DATASTORE_S3_SERVICE_NAME" ]] && fail "DATASTORE_S3_SERVICE_NAME is not set to a serivice in VCAP_SERVICES"
+
   cat <<EOF
-DATASTORE_BUCKET_NAME="$(jq -r -e '.credentials.bucket' < $service_metadata)"
-DATASTORE_BUCKET_ACCESS_KEY_ID="$(jq -r -e '.credentials.access_key_id' < $service_metadata)"
-DATASTORE_BUCKET_SECRET_ACCESS_KEY="$(jq -r -e '.credentials.secret_access_key' < $service_metadata)"
-DATASTORE_BUCKET_REGION="$(jq -r -e '.credentials.region' < $service_metadata)"
+DATASTORE_BUCKET_NAME="$(get_service_instance "$DATASTORE_S3_SERVICE_NAME" | jq -r -e '.credentials.bucket')"
+DATASTORE_BUCKET_ACCESS_KEY_ID="$(get_service_instance "$DATASTORE_S3_SERVICE_NAME" | jq -r -e '.credentials.access_key_id')"
+DATASTORE_BUCKET_SECRET_ACCESS_KEY="$(get_service_instance "$DATASTORE_S3_SERVICE_NAME" | jq -r -e '.credentials.secret_access_key')"
+DATASTORE_BUCKET_REGION="$(get_service_instance "$DATASTORE_S3_SERVICE_NAME" | jq -r -e '.credentials.region')"
 EOF
 }
 
@@ -47,4 +40,9 @@ function aws_cmd () {
   fi
 
   aws $aws_arguments "$@"
+}
+
+function fatal () {
+  echo "$*" >&2
+  return 2
 }
