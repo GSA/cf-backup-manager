@@ -1,10 +1,11 @@
 ---
 applications:
-  - name: datastore-backup
+  - name: backup-manager
     instances: 0
     docker:
-      image: docker.io/adborden/cf-datastore-backup
-    command: sleep 3600
+      image: ghcr.io/gsa/cf-backup-manager:((docker_tag))
+    command: sleep infinity
+    memory: 64M
     health-check-type: process
     no-route: true
     environment:
