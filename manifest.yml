@@ -10,6 +10,7 @@ applications:
     no-route: true
     environment:
       - AWS_DEFAULT_REGION=us-gov-west-1
+      - DATASTORE_S3_SERVICE_NAME=datastore-backups
     services:
       - datastore-backups
       - dashboard-db
