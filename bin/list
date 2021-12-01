@@ -1,4 +1,11 @@
 #!/bin/bash
+#
+# List the contents of the backup-manager s3 bucket.
+#
+# Usage:
+#   list: [path]
+#
+# path: optional path within the S3 bucket to list
 
 set -o errexit
 set -o pipefail
@@ -7,9 +14,7 @@ set -o nounset
 source $PROJECT_DIR/lib/core.bash
 
 # Load backup-manager-s3 creds
-get_service_instance "$DATASTORE_S3_SERVICE_NAME" <<<$VCAP_SERVICES > "$(env_file datastore_s3_metadata)"
-get_datastore_bucket_credentials_env "$(env_file datastore_s3_metadata)" > "$(env_file datastore_s3_credentials)"
-source "$(env_file datastore_s3_credentials)"
+eval "$(get_datastore_bucket_credentials_env)"
 
 bucket_path="${1:-}"
 bucket_path="${bucket_path#/}" # Remove starting /

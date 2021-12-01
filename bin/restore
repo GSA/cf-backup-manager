@@ -1,0 +1,60 @@
+#!/bin/bash
+#
+# Restore the given backup to the named service.
+#
+# Usage:
+#   backup <service_type> <service_name> <backup_path>
+#
+# Params:
+#   service_type: The type of the service, either mysql or postgresql
+#   service_name: The name of the service to backup
+#   backup_path:  Full path of the backup to restore within the s3 bucket
+
+
+set -o errexit
+set -o pipefail
+set -o nounset
+#set -x # useful for debugging tests
+
+
+function usage () {
+  cat <<EOF >&2
+usage: restore <service_type> <service_name> <backup_path>
+
+  service_type: Type of the service, either mysql or postgresql
+  service_name: Name of the service to restore
+  backup_path:  Full path of the backup to restore within the s3 bucket
+
+Environment variables:
+
+  DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
+
+EOF
+}
+
+
+if [[ "$#" -lt 3 ]]; then
+  usage
+  exit 1
+fi
+
+# Parse arguments
+service_type="$1"
+shift
+service_name="$1"
+shift
+backup_path="$1"
+shift
+
+# Strip any starting slashes
+backup_path="${backup_path##/}"
+
+source $PROJECT_DIR/lib/core.bash
+source $PROJECT_DIR/lib/${service_type}.bash
+
+eval "$(get_datastore_bucket_credentials_env)"
+eval "$(service_get_credentials_env $service_name)"
+
+echo "restoring $service_name ($service_type) from /$backup_path..."
+time AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp s3://$DATASTORE_BUCKET_NAME/${backup_path} - | gunzip | service_restore
+echo ok

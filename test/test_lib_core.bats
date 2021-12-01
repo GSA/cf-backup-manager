@@ -18,8 +18,9 @@ function test_fixture () {
 }
 
 
-@test "get_service_instance application-db is found" {
-  run get_service_instance application-db < $(test_fixture example.vcap.json)
+@test "get_service_instance application-psql-db is found" {
+  VCAP_SERVICES="$(cat $(test_fixture example.vcap.json))"
+  run get_service_instance application-psql-db
 
   assert_success
   assert_output - <<EOF
@@ -27,18 +28,18 @@ function test_fixture () {
   "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
   "binding_name": null,
   "credentials": {
-    "db_name": "application",
+    "db_name": "application-psql-db",
     "host": "postgres",
-    "name": "application",
+    "name": "application-psql-db",
     "password": "postgres-password",
     "port": "5432",
-    "uri": "postgres://postgres:postgres-password@postgres:5432/application",
+    "uri": "postgres://app:postgres-password@postgres:5432/application-psql-db",
     "username": "app"
   },
   "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-  "instance_name": "application-db",
+  "instance_name": "application-psql-db",
   "label": "aws-rds",
-  "name": "application-db",
+  "name": "application-psql-db",
   "plan": "small-psql",
   "provider": null,
   "syslog_drain_url": null,
@@ -52,19 +53,17 @@ EOF
 }
 
 @test "get_service_instance nonexist-db is not found" {
-  run get_service_instance nonexist-db < $(test_fixture example.vcap.json)
+  VCAP_SERVICES="$(cat $(test_fixture example.vcap.json))"
+  run get_service_instance nonexist-db
+
   assert_failure
   assert_output ""
 }
 
-@test "get_service_label_plan given mysql service instance, returns aws-rds small-mysql" {
-  run get_service_label_plan < $(test_fixture mysql-service-instance.vcap.json)
-  assert_success
-  assert_output "aws-rds small-mysql"
-}
-
 @test "get_datastore_bucket_credentials_env" {
-  run get_datastore_bucket_credentials_env $(test_fixture datastore-s3.vcap.json)
+  VCAP_SERVICES="$(cat $(test_fixture datastore-s3.vcap.json))"
+  DATASTORE_S3_SERVICE_NAME=backup-s3
+  run get_datastore_bucket_credentials_env
 
   assert_success
   assert_output - <<EOF

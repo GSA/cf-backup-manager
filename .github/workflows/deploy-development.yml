@@ -1,0 +1,43 @@
+---
+name: deploy
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  publish:
+    name: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: login to ghcr
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: publish
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ghcr.io/gsa/cf-backup-manager:development
+
+  deploy-development:
+    name: deploy (development)
+    environment: development
+    runs-on: ubuntu-latest
+    needs:
+      - publish
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+      - name: deploy
+        uses: usds/cloud-gov-cli@master
+        with:
+          command: push backup-manager --vars-file vars.development.yml --strategy rolling
+          org: gsa-datagov
+          space: development
+          user: ${{secrets.CF_SERVICE_USER}}
+          password: ${{secrets.CF_SERVICE_AUTH}}
