@@ -4,6 +4,7 @@ function setup () {
   load 'test_helper/bats-support/load'
   load 'test_helper/bats-assert/load'
   load 'test_helper/common'
+  load 'test_helper/mysql'
   _common_setup
 
   TEST_DATASTORE_BUCKET=datastore-backup-test
@@ -12,6 +13,10 @@ function setup () {
 
   source $PROJECT_ROOT/lib/core.bash
   source $PROJECT_ROOT/lib/mysql.bash
+
+  wait_for mysql_cmd <<SQL
+select 1;
+SQL
 }
 
 @test "mysql:service_get_credentials_env" {

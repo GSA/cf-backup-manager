@@ -5,6 +5,7 @@ function setup () {
   load 'test_helper/bats-assert/load'
 
   load 'test_helper/common'
+  load 'test_helper/mysql'
   _common_setup
 
   TEST_DATASTORE_BUCKET=datastore-backup-test
@@ -17,6 +18,11 @@ function setup () {
   VCAP_APPLICATION="$(cat $(test_fixture vcap-application.json))"
 
   aws_helper s3api create-bucket --bucket $TEST_DATASTORE_BUCKET
+
+  # Wait for mysql container to be up
+  wait_for mysql_cmd <<SQL
+select 1;
+SQL
 }
 
 function teardown () {

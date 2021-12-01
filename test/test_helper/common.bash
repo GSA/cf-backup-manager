@@ -15,3 +15,15 @@ function test_fixture () {
 function aws_helper () {
   AWS_ACCESS_KEY_ID=minio AWS_SECRET_ACCESS_KEY=miniopassword aws --endpoint http://s3:9000 "$@"
 }
+
+function wait_for () {
+  local -i retries=0
+  while [[ $retries -lt 60 ]]; do
+    if "$@"; then
+      break
+    fi
+
+    sleep 1
+    retries=$(( $retries + 1))
+  done
+}
