@@ -8,22 +8,22 @@
 # Params:
 #   service_type: The type of the service, either mysql or postgresql
 #   service_name: The name of the service to backup
-#   backup_path:  Full path of the backup to restore within the s3 bucket, minus the file extension
+#   backup_path:  Full path of the backup to restore within the s3 bucket
 
 
 set -o errexit
 set -o pipefail
 set -o nounset
-set -x # useful for debugging tests
+#set -x # useful for debugging tests
 
 
 function usage () {
   cat <<EOF >&2
-usage: restore <service_type> <service_name> <path>
+usage: restore <service_type> <service_name> <backup_path>
 
   service_type: Type of the service, either mysql or postgresql
   service_name: Name of the service to restore
-  backup_path:  Full path of the backup to restore within the s3 bucket, minus the file extension
+  backup_path:  Full path of the backup to restore within the s3 bucket
 
 Environment variables:
 
@@ -55,6 +55,6 @@ source $PROJECT_DIR/lib/${service_type}.bash
 eval "$(get_datastore_bucket_credentials_env)"
 eval "$(service_get_credentials_env $service_name)"
 
-echo "restoring $service_name ($service_type) from $backup_path..."
-service_restore s3://$DATASTORE_BUCKET_NAME/$backup_path
+echo "restoring $service_name ($service_type) from /$backup_path..."
+AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp s3://$DATASTORE_BUCKET_NAME/${backup_path} - | gunzip | service_restore
 echo ok

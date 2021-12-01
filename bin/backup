@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# Backup the given service to the backup-manager s3 bucket.
+#
+# Usage:
+#   backup <service_type> <service_name> [path]
+#
+# Params:
+#   service_type: The type of the service, either mysql or postgresql
+#   service_name: The name of the service to backup
+#   path:         optional path to store the backup
+
+
+set -o errexit
+set -o pipefail
+set -o nounset
+#set -x # useful for debugging tests
+
+
+function usage () {
+  cat <<EOF >&2
+usage: backup <service_type> <service_name> [backup_path]
+
+  service_type: the type of service to backup (e.g. mysql or postgresql)
+  service_name: the service name to backup
+  backup_path:  (optional) the full path to store backups within the s3 bucket
+
+Environment variables:
+
+  DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
+
+EOF
+}
+
+
+if [[ "$#" -lt 2 ]]; then
+  usage
+  exit 1
+fi
+
+# Get the name of the space we're running in
+space_name="$(jq -r -e '.space_name' <<< "$VCAP_APPLICATION")"
+
+# Parse arguments
+service_type="$1"
+shift
+service_name="$1"
+shift
+
+backup_path="backup-manager-v1/$space_name/$service_name/${service_name}-$(date +%Y%m%d%H%M%S)-backup.gz"
+if [[ "$#" -gt 0 ]]; then
+  backup_path="$1"
+  shift
+fi
+
+# Ensure a starting slashes
+backup_path="/${backup_path##/}"
+
+source $PROJECT_DIR/lib/core.bash
+source $PROJECT_DIR/lib/${service_type}.bash
+
+eval "$(get_datastore_bucket_credentials_env)"
+eval "$(service_get_credentials_env $service_name)"
+
+echo "backing up $service_name ($service_type) to $backup_path..."
+service_backup | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
+echo ok

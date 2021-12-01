@@ -7,6 +7,28 @@ services:
     environment:
       DATAGOV_BACKUP_S3_SERVICE: datastore-backup-s3
       DATASTORE_BUCKET_ENDPOINT: http://s3:9000
+      VCAP_APPLICATION: |
+        {
+          "cf_api": "https://api.fr.cloud.gov",
+          "limits": {
+            "fds": 16384,
+            "mem": 64,
+            "disk": 1024
+          },
+          "application_name": "backup-manager",
+          "application_uris": [],
+          "name": "backup-manager",
+          "space_name": "development",
+          "space_id": "eab3d327-7d9f-423b-9838-753c26fdb5a0",
+          "organization_id": "90047c5d-337f-4802-bd48-2149a4265040",
+          "organization_name": "gsa-datagov",
+          "uris": [],
+          "process_id": "6e443533-313f-4503-9cf9-a9e0fb410b0a",
+          "process_type": "web",
+          "application_id": "2c9987f0-9a4f-4590-b29a-cdc6d9d97d4a",
+          "version": "3a640698-3af3-4bde-8936-94440e8ca6fb",
+          "application_version": "3a640698-3af3-4bde-8936-94440e8ca6fb"
+        }
       VCAP_SERVICES: |
         {
           "aws-rds": [
@@ -14,18 +36,18 @@ services:
               "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
               "binding_name": null,
               "credentials": {
-                "db_name": "application",
+                "db_name": "application-psql-db",
                 "host": "postgres",
-                "name": "application",
+                "name": "application-psql-db",
                 "password": "postgres-password",
                 "port": "5432",
-                "uri": "postgres://app:postgres-password@postgres:5432/application",
+                "uri": "postgres://app:postgres-password@postgres:5432/application-psql-db",
                 "username": "app"
               },
               "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-              "instance_name": "application-db",
+              "instance_name": "application-psql-db",
               "label": "aws-rds",
-              "name": "application-db",
+              "name": "application-psql-db",
               "plan": "small-psql",
               "provider": null,
               "syslog_drain_url": null,
@@ -48,9 +70,9 @@ services:
                 "username": "app"
               },
               "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-              "instance_name": "application-db",
+              "instance_name": "application-mysql-db",
               "label": "aws-rds",
-              "name": "application-db",
+              "name": "application-mysql-db",
               "plan": "small-mysql",
               "provider": null,
               "syslog_drain_url": null,
@@ -104,7 +126,7 @@ services:
     image: mysql:5
     environment:
       MYSQL_USER: app
-      MYSQL_DB: application-mysql-db
+      MYSQL_DATABASE: application-mysql-db
       MYSQL_PASSWORD: mysql-password
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     ports:

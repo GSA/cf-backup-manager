@@ -13,9 +13,9 @@
         "username": "app"
       },
       "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-      "instance_name": "application-db",
+      "instance_name": "application-mysql-db",
       "label": "aws-rds",
-      "name": "application-db",
+      "name": "application-mysql-db",
       "plan": "small-mysql",
       "provider": null,
       "syslog_drain_url": null,

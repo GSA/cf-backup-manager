@@ -1,7 +1,4 @@
-
-function service_get_type () {
-  :
-}
+# mysql service implements the service API
 
 # Output service credentials as env variables
 function service_get_credentials_env () {
@@ -18,11 +15,9 @@ EOF
 }
 
 function service_backup () {
-  local s3_object="$1"
-  mysqldump --no-tablespaces --host="$DB_HOST" --port="$DB_PORT" --password="$DB_PASSWORD" --user "$DB_USER" --no-create-db --verbose "$DB_NAME" | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - ${s3_object}.sql.gz
+  mysqldump --no-tablespaces --host="$DB_HOST" --port="$DB_PORT" --password="$DB_PASSWORD" --user="$DB_USER" --no-create-db "$DB_NAME"
 }
 
 function service_restore () {
-  local s3_object="$1"
-  AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp ${s3_object}.sql.gz - | gzip | mysql --host "$DB_HOST" --password="$DB_PASSWORD" --user "$DB_USER" --verbose "$DB_NAME"
+  mysql --binary-mode --host="$DB_HOST" --port="$DB_PORT" --password="$DB_PASSWORD" --user="$DB_USER" "$DB_NAME"
 }

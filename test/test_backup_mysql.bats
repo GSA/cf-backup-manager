@@ -1,4 +1,4 @@
-# Test restore command for mysql services
+# Test backup command for mysql services
 
 function setup () {
   load 'test_helper/bats-support/load'
@@ -16,11 +16,7 @@ function setup () {
   VCAP_SERVICES="$(cat $(test_fixture mysql-test.vcap.json))"
   VCAP_APPLICATION="$(cat $(test_fixture vcap-application.json))"
 
-  # Create the backup-manager bucket
   aws_helper s3api create-bucket --bucket $TEST_DATASTORE_BUCKET
-
-  # Gzip and upload an empty backup
-  gzip < $(test_fixture mysql-empty-backup.sql) | aws_helper s3 cp - s3://$TEST_DATASTORE_BUCKET/mysql-backup.sql.gz
 }
 
 function teardown () {
@@ -28,17 +24,15 @@ function teardown () {
   aws_helper s3 rb s3://$TEST_DATASTORE_BUCKET --force
 }
 
-@test "restore given no arguments prints usage" {
-  run restore
+@test "backup given no arguments prints usage" {
+  run backup
   assert_failure
-  assert_output --partial 'usage: restore <service_type> <service_name> <backup_path>'
+  assert_output --partial 'usage: backup <service_type> <service_name> [backup_path]'
 }
 
-@test "restore mysql application-mysql-db" {
-  run restore mysql application-mysql-db /mysql-backup.sql.gz
+@test "backup mysql application-mysql-db" {
+  run backup mysql application-mysql-db
   assert_success
-  assert_output - <<EOF
-restoring application-mysql-db (mysql) from /mysql-backup.sql.gz...
-ok
-EOF
+  assert_output --partial "backing up application-mysql-db (mysql) to"
+  assert_output --partial "ok"
 }
