@@ -37,8 +37,6 @@ function teardown () {
 @test "restore mysql application-mysql-db" {
   run restore mysql application-mysql-db /mysql-backup.sql.gz
   assert_success
-  assert_output - <<EOF
-restoring application-mysql-db (mysql) from /mysql-backup.sql.gz...
-ok
-EOF
+  assert_output --partial 'restoring application-mysql-db (mysql) from /mysql-backup.sql.gz...'
+  assert_output --partial 'ok'
 }

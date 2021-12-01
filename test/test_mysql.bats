@@ -24,15 +24,11 @@ function teardown () {
 @test "mysql backup and restore" {
   run backup mysql application-mysql-db /mysql-backup.sql.gz
   assert_success
-  assert_output - <<EOF
-backing up application-mysql-db (mysql) to /mysql-backup.sql.gz...
-ok
-EOF
+  assert_output --partial 'backing up application-mysql-db (mysql) to /mysql-backup.sql.gz...'
+  assert_output --partial 'ok'
 
   run restore mysql application-mysql-db /mysql-backup.sql.gz
   assert_success
-  assert_output - <<EOF
-restoring application-mysql-db (mysql) from /mysql-backup.sql.gz...
-ok
-EOF
+  assert_output --partial 'restoring application-mysql-db (mysql) from /mysql-backup.sql.gz...'
+  assert_output --partial 'ok'
 }

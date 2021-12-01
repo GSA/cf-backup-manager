@@ -15,7 +15,7 @@ EOF
 }
 
 function service_backup () {
-  mysqldump --no-tablespaces --host="$DB_HOST" --port="$DB_PORT" --password="$DB_PASSWORD" --user="$DB_USER" --no-create-db "$DB_NAME"
+  mysqldump --no-tablespaces --host="$DB_HOST" --port="$DB_PORT" --password="$DB_PASSWORD" --user="$DB_USER" --no-create-db --verbose "$DB_NAME"
 }
 
 function service_restore () {
