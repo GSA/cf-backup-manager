@@ -39,7 +39,7 @@ services:
               "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
               "binding_name": null,
               "credentials": {
-                "db_name": "application",
+                "db_name": "application-mysql-db",
                 "host": "mysql",
                 "name": "application",
                 "password": "mysql-password",
@@ -104,8 +104,8 @@ services:
     image: mysql:5
     environment:
       MYSQL_USER: app
-      MYSQL_DB: application
-      MYSQL_PASSWORD: app-password
+      MYSQL_DB: application-mysql-db
+      MYSQL_PASSWORD: mysql-password
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     ports:
       - "3306:3306"
