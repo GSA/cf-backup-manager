@@ -11,4 +11,5 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - run: make test
+      - name: make test
+        run: make BATS_ARGS=--recursive test
