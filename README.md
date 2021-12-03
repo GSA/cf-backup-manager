@@ -144,7 +144,7 @@ New images are published on any push to `main` via GitHub Actions.
 
 ## Tests
 
-The `bats` test framework is used to perform unit testing of inidividual backup/restore aspects.
+The `bats` test framework is used to perform unit testing of individual backup/restore aspects.
 The tests are located in the `test/` subdirectory.  To run the tests,
 
 ```
