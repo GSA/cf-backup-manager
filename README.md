@@ -142,6 +142,17 @@ Function name | arguments | stdin | stdout
 The Cloud Foundry application uses a docker image published to this repository.
 New images are published on any push to `main` via GitHub Actions.
 
+## Tests
+
+The `bats` test framework is used to perform unit testing of individual backup/restore aspects.
+The tests are located in the `test/` subdirectory.  To run the tests,
+
+```
+git submodule init
+git submodule update
+make test
+```
+
 ## Contributing
 
 See [CONTRIBUTING](CONTRIBUTING.md) for additional information.
