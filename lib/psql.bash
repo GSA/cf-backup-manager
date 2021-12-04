@@ -3,7 +3,7 @@
 # Output service credentials as env variables
 function service_get_credentials_env () {
   local service_name="${1:-}"
-  [[ -z "$service_name" ]] && fail service_get_credentials_env passed an empty service_name
+  [[ -z "$service_name" ]] && fatal service_get_credentials_env passed an empty service_name
 
   cat <<EOF
 DB_HOST="$(get_service_instance "$service_name" | jq -r -e '.credentials.host')"

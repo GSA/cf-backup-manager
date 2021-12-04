@@ -6,14 +6,15 @@
 #   JSON metadata for the named VCAP service
 function get_service_instance () {
   local service_name=$1
-  jq -e ".[][] | select(.instance_name==\"${service_name}\")" <<< "$VCAP_SERVICES"
+  jq -e ".[][] | select(.instance_name==\"${service_name}\")" <<< "$VCAP_SERVICES" || fatal "$service_name does not exist in VCAP_SERVICES"
 }
 
 # Prints S3 bucket credentials for environment
 function backup_manager_bucket_credentials_env () {
-  [[ -z "$BACKUP_MANAGER_S3_SERVICE_NAME" ]] && fail "BACKUP_MANAGER_S3_SERVICE_NAME is not set to a serivice in VCAP_SERVICES"
+  [[ -z "$BACKUP_MANAGER_S3_SERVICE_NAME" ]] && fatal "BACKUP_MANAGER_S3_SERVICE_NAME is not set"
+  [[ -z "$(get_service_instance "$BACKUP_MANAGER_S3_SERVICE_NAME")" ]] && fatal "BACKUP_MANAGER_S3_SERVICE_NAME ($BACKUP_MANAGER_S3_SERVICE_NAME) does not exist in VCAP_SERVICES"
 
-  cat <<EOF
+cat <<EOF
 BACKUP_MANAGER_BUCKET_NAME="$(get_service_instance "$BACKUP_MANAGER_S3_SERVICE_NAME" | jq -r -e '.credentials.bucket')"
 BACKUP_MANAGER_BUCKET_ACCESS_KEY_ID="$(get_service_instance "$BACKUP_MANAGER_S3_SERVICE_NAME" | jq -r -e '.credentials.access_key_id')"
 BACKUP_MANAGER_BUCKET_SECRET_ACCESS_KEY="$(get_service_instance "$BACKUP_MANAGER_S3_SERVICE_NAME" | jq -r -e '.credentials.secret_access_key')"
@@ -38,6 +39,6 @@ function aws_cmd () {
 }
 
 function fatal () {
-  echo "$*" >&2
-  return 2
+  echo error: "$*" >&2
+  exit 2
 }

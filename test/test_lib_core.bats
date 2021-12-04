@@ -17,6 +17,11 @@ function test_fixture () {
   echo $BATS_TEST_DIRNAME/data/$1
 }
 
+@test "fatal fails with message" {
+  run fatal "an error"
+  assert_failure
+  assert_output "error: an error"
+}
 
 @test "get_service_instance application-psql-db is found" {
   VCAP_SERVICES="$(cat $(test_fixture example.vcap.json))"
@@ -57,7 +62,7 @@ EOF
   run get_service_instance nonexist-db
 
   assert_failure
-  assert_output ""
+  assert_output "error: nonexist-db does not exist in VCAP_SERVICES"
 }
 
 @test "backup_manager_bucket_credentials_env" {
@@ -72,4 +77,13 @@ BACKUP_MANAGER_BUCKET_ACCESS_KEY_ID="minio"
 BACKUP_MANAGER_BUCKET_SECRET_ACCESS_KEY="miniopassword"
 BACKUP_MANAGER_BUCKET_REGION="us-gov-west-1"
 EOF
+}
+
+@test "backup_manager_bucket_credentials_env given BACKUP_MANAGER_S3_SERVICE_NAME is incorrect" {
+  VCAP_SERVICES="$(cat $(test_fixture datastore-s3.vcap.json))"
+  BACKUP_MANAGER_S3_SERVICE_NAME=nonexist-s3
+  run backup_manager_bucket_credentials_env
+
+  assert_failure
+  assert_output --partial "error: BACKUP_MANAGER_S3_SERVICE_NAME (nonexist-s3) does not exist in VCAP_SERVICES"
 }
