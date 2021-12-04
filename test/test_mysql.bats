@@ -6,19 +6,19 @@ function setup () {
   load 'test_helper/common'
   _common_setup
 
-  TEST_DATASTORE_BUCKET=datastore-backup-test
-  DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3
+  TEST_BACKUP_MANAGER_BUCKET=datastore-backup-test
+  BACKUP_MANAGER_S3_SERVICE_NAME=datastore-backup-test-s3
   VCAP_SERVICES="$(cat $(test_fixture mysql-test.vcap.json))"
 
-  export DATASTORE_S3_SERVICE_NAME
+  export BACKUP_MANAGER_S3_SERVICE_NAME
 
   # Create the bucket
-  aws_helper s3api create-bucket --bucket $TEST_DATASTORE_BUCKET
+  aws_helper s3api create-bucket --bucket $TEST_BACKUP_MANAGER_BUCKET
 }
 
 function teardown () {
   # Delete the test bucket
-  aws_helper s3 rb s3://$TEST_DATASTORE_BUCKET --force
+  aws_helper s3 rb s3://$TEST_BACKUP_MANAGER_BUCKET --force
 }
 
 @test "mysql backup and restore" {

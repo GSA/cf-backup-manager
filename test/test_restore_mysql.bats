@@ -7,8 +7,8 @@ function setup () {
   load 'test_helper/common'
   _common_setup
 
-  TEST_DATASTORE_BUCKET=datastore-backup-test
-  export DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3
+  TEST_BACKUP_MANAGER_BUCKET=datastore-backup-test
+  export BACKUP_MANAGER_S3_SERVICE_NAME=datastore-backup-test-s3
 
   # Make sure the test fixture contains service credentials that match the
   # docker-compose environment. The backup command will backup from the local
@@ -17,15 +17,15 @@ function setup () {
   VCAP_APPLICATION="$(cat $(test_fixture vcap-application.json))"
 
   # Create the backup-manager bucket
-  aws_helper s3api create-bucket --bucket $TEST_DATASTORE_BUCKET
+  aws_helper s3api create-bucket --bucket $TEST_BACKUP_MANAGER_BUCKET
 
   # Gzip and upload an empty backup
-  gzip < $(test_fixture mysql-empty-backup.sql) | aws_helper s3 cp - s3://$TEST_DATASTORE_BUCKET/mysql-backup.sql.gz
+  gzip < $(test_fixture mysql-empty-backup.sql) | aws_helper s3 cp - s3://$TEST_BACKUP_MANAGER_BUCKET/mysql-backup.sql.gz
 }
 
 function teardown () {
   # Delete the test bucket
-  aws_helper s3 rb s3://$TEST_DATASTORE_BUCKET --force
+  aws_helper s3 rb s3://$TEST_BACKUP_MANAGER_BUCKET --force
 }
 
 @test "restore given no arguments prints usage" {

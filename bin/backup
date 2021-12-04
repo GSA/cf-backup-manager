@@ -27,7 +27,7 @@ usage: backup <service_type> <service_name> [backup_path]
 
 Environment variables:
 
-  DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
+  BACKUP_MANAGER_S3_SERVICE_NAME: the name of the S3 service to store backups.
 
 EOF
 }
@@ -59,9 +59,9 @@ backup_path="/${backup_path##/}"
 source $PROJECT_DIR/lib/core.bash
 source $PROJECT_DIR/lib/${service_type}.bash
 
-eval "$(get_datastore_bucket_credentials_env)"
+eval "$(backup_manager_bucket_credentials_env)"
 eval "$(service_get_credentials_env $service_name)"
 
 echo "backing up $service_name ($service_type) to $backup_path..."
-time service_backup | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
+time service_backup | gzip | AWS_ACCESS_KEY_ID="$BACKUP_MANAGER_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$BACKUP_MANAGER_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${BACKUP_MANAGER_BUCKET_NAME}${backup_path}
 echo ok
