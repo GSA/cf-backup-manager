@@ -9,11 +9,6 @@ function get_service_instance () {
   jq -e ".[][] | select(.instance_name==\"${service_name}\")" <<< "$VCAP_SERVICES"
 }
 
-# Prints the service type
-function get_service_type () {
-  :
-}
-
 # Prints S3 bucket credentials for environment
 function backup_manager_bucket_credentials_env () {
   [[ -z "$BACKUP_MANAGER_S3_SERVICE_NAME" ]] && fail "BACKUP_MANAGER_S3_SERVICE_NAME is not set to a serivice in VCAP_SERVICES"
