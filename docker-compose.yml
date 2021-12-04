@@ -5,8 +5,8 @@ services:
     build: .
     working_dir: /app
     environment:
-      DATAGOV_BACKUP_S3_SERVICE: datastore-backup-s3
-      DATASTORE_BUCKET_ENDPOINT: http://s3:9000
+      BACKUP_MANAGER_S3_SERVICE: datastore-backup-s3
+      BACKUP_MANAGER_BUCKET_ENDPOINT: http://s3:9000
       VCAP_APPLICATION: |
         {
           "cf_api": "https://api.fr.cloud.gov",

@@ -60,16 +60,16 @@ EOF
   assert_output ""
 }
 
-@test "get_datastore_bucket_credentials_env" {
+@test "backup_manager_bucket_credentials_env" {
   VCAP_SERVICES="$(cat $(test_fixture datastore-s3.vcap.json))"
-  DATASTORE_S3_SERVICE_NAME=backup-s3
-  run get_datastore_bucket_credentials_env
+  BACKUP_MANAGER_S3_SERVICE_NAME=backup-s3
+  run backup_manager_bucket_credentials_env
 
   assert_success
   assert_output - <<EOF
-DATASTORE_BUCKET_NAME="datastore-backup"
-DATASTORE_BUCKET_ACCESS_KEY_ID="minio"
-DATASTORE_BUCKET_SECRET_ACCESS_KEY="miniopassword"
-DATASTORE_BUCKET_REGION="us-gov-west-1"
+BACKUP_MANAGER_BUCKET_NAME="datastore-backup"
+BACKUP_MANAGER_BUCKET_ACCESS_KEY_ID="minio"
+BACKUP_MANAGER_BUCKET_SECRET_ACCESS_KEY="miniopassword"
+BACKUP_MANAGER_BUCKET_REGION="us-gov-west-1"
 EOF
 }

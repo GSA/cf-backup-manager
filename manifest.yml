@@ -10,9 +10,10 @@ applications:
     no-route: true
     env:
       AWS_DEFAULT_REGION: us-gov-west-1
-      DATASTORE_S3_SERVICE_NAME: datastore-backups
+      BACKUP_MANAGER_S3_SERVICE_NAME: datastore-backups # TODO Replace with backup-manager-s3
     services:
-      - datastore-backups
+      - backup-manager-s3
+      - datastore-backups # TODO remove me after migrating FCS
       - dashboard-db
       - catalog-db
       - catalog-db-migrate

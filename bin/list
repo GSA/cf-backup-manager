@@ -14,9 +14,9 @@ set -o nounset
 source $PROJECT_DIR/lib/core.bash
 
 # Load backup-manager-s3 creds
-eval "$(get_datastore_bucket_credentials_env)"
+eval "$(backup_manager_bucket_credentials_env)"
 
 bucket_path="${1:-}"
 bucket_path="${bucket_path#/}" # Remove starting /
 
-AWS_ACCESS_KEY_ID=$DATASTORE_BUCKET_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DATASTORE_BUCKET_SECRET_ACCESS_KEY aws_cmd s3 ls s3://${DATASTORE_BUCKET_NAME}/${bucket_path}
+AWS_ACCESS_KEY_ID=$BACKUP_MANAGER_BUCKET_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$BACKUP_MANAGER_BUCKET_SECRET_ACCESS_KEY aws_cmd s3 ls s3://${BACKUP_MANAGER_BUCKET_NAME}/${bucket_path}

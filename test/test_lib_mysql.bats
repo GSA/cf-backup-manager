@@ -7,9 +7,8 @@ function setup () {
   load 'test_helper/mysql'
   _common_setup
 
-  TEST_DATASTORE_BUCKET=datastore-backup-test
   VCAP_SERVICES="$(cat $(test_fixture mysql-test.vcap.json))"
-  DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3
+  BACKUP_MANAGER_S3_SERVICE_NAME=datastore-backup-test-s3
 
   source $PROJECT_ROOT/lib/core.bash
   source $PROJECT_ROOT/lib/mysql.bash
