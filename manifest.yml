@@ -15,4 +15,3 @@ applications:
       - datastore-backups
       - dashboard-db
       - catalog-db
-      - catalog-db-migrate
