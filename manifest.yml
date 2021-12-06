@@ -14,5 +14,10 @@ applications:
     services:
       - datastore-backups
       - dashboard-db
+      - dashboard-s3
       - catalog-db
-      - catalog-db-migrate
+      - catalog-redis
+      - inventory-datastore
+      - inventory-db
+      - inventory-redis
+      - inventory-s3
