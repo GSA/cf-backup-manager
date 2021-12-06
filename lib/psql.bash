@@ -21,5 +21,5 @@ function service_backup () {
 }
 
 function service_restore () {
-  PGPASSWORD=$DB_PASSWORD pg_restore -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" --no-owner --clean -d "$DB_NAME"
+  PGPASSWORD=$DB_PASSWORD pg_restore -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" --no-owner -d "$DB_NAME"
 }
