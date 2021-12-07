@@ -40,8 +40,9 @@ if [[ "$#" -lt 4 ]]; then
 fi
 
 # Parse arguments
+db_flags=''
 if [[ "$#" -gt 3 ]]; then
-  db_flags="${1:-''}"
+  db_flags="$1"
   shift
 fi
 

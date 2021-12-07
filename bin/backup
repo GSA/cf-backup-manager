@@ -43,8 +43,9 @@ fi
 space_name="$(jq -r -e '.space_name' <<< "$VCAP_APPLICATION")"
 
 # Parse arguments
+db_flags=''
 if [[ "$#" -gt 3 ]]; then
-  db_flags="${1:-''}"
+  db_flags="$1"
   shift
 fi
 
