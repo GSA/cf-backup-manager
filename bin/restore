@@ -21,7 +21,7 @@ function usage () {
   cat <<EOF >&2
 usage: restore '<db_flags>' <service_type> <service_name> <backup_path>
 
-  db_flags: PSQL/MYSQL flag arguments to pass into restore function
+  db_flags (optional): PSQL/MYSQL flag arguments to pass into restore function
   service_type: Type of the service, either mysql or postgresql
   service_name: Name of the service to restore
   backup_path:  Full path of the backup to restore within the s3 bucket
@@ -40,8 +40,11 @@ if [[ "$#" -lt 4 ]]; then
 fi
 
 # Parse arguments
-db_flags="$1"
-shift
+if [[ "$#" -gt 3 ]]; then
+  db_flags="${1:-''}"
+  shift
+fi
+
 service_type="$1"
 shift
 service_name="$1"

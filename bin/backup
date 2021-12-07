@@ -21,6 +21,7 @@ function usage () {
   cat <<EOF >&2
 usage: backup <service_type> <service_name> [backup_path]
 
+  db_flags (optional): PSQL/MYSQL flag arguments to pass into backup function
   service_type: the type of service to backup (e.g. mysql or postgresql)
   service_name: the service name to backup
   backup_path:  (optional) the full path to store backups within the s3 bucket
@@ -42,6 +43,11 @@ fi
 space_name="$(jq -r -e '.space_name' <<< "$VCAP_APPLICATION")"
 
 # Parse arguments
+if [[ "$#" -gt 3 ]]; then
+  db_flags="${1:-''}"
+  shift
+fi
+
 service_type="$1"
 shift
 service_name="$1"
@@ -63,5 +69,5 @@ eval "$(get_datastore_bucket_credentials_env)"
 eval "$(service_get_credentials_env $service_name)"
 
 echo "backing up $service_name ($service_type) to $backup_path..."
-time service_backup | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
+time service_backup $db_flags | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
 echo ok

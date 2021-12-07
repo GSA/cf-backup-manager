@@ -39,7 +39,7 @@ List the contents of the backup-manager-s3 bucket.
     $ cf run-task backup-manager --name "catalog-restore" --command "list /"
     $ cf logs backup-manager --recent
 
-#### backup <service_type> <service_name> [backup_path]
+#### backup ['<db_flags>'] <service_type> <service_name> [backup_path]
 
 Create a backup for the named service. You must specify the service type e.g.
 mysql. If you don't provide a backup path, then one will be generated in the
@@ -47,7 +47,7 @@ form:
 
 > /backup-manager-v1/$space/$service_name/$service_name-$datetime-backup.gz
 
-#### restore <service_type> <service_name> <backup_path>
+#### restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
 Restore the named backup to the specified service.
 
