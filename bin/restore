@@ -19,7 +19,7 @@ set -o nounset
 
 function usage () {
   cat <<EOF >&2
-usage: restore '<db_flags>' <service_type> <service_name> <backup_path>
+usage: restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
   db_flags (optional): PSQL/MYSQL flag arguments to pass into restore function
   service_type: Type of the service, either mysql or postgresql

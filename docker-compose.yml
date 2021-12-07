@@ -36,18 +36,18 @@ services:
               "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
               "binding_name": null,
               "credentials": {
-                "db_name": "application-psql-db",
+                "db_name": "postgres",
                 "host": "postgres",
-                "name": "application-psql-db",
-                "password": "postgres-password",
+                "name": "postgres",
+                "password": "psql",
                 "port": "5432",
-                "uri": "postgres://app:postgres-password@postgres:5432/application-psql-db",
-                "username": "app"
+                "uri": "postgres://postgres:psql@postgres:5432/postgres",
+                "username": "postgres"
               },
               "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-              "instance_name": "application-psql-db",
+              "instance_name": "postgres",
               "label": "aws-rds",
-              "name": "application-psql-db",
+              "name": "postgres",
               "plan": "small-psql",
               "provider": null,
               "syslog_drain_url": null,
@@ -135,9 +135,7 @@ services:
   postgres:
     image: postgres:10-alpine
     environment:
-      POSTGRES_DB: application
-      POSTGRES_USER: app
-      POSTGRES_PASSWORD: app-password
+      POSTGRES_PASSWORD: psql
     ports:
       - "5432:5432"
 

@@ -18,7 +18,8 @@ EOF
 # https://github.com/GSA/datagov-deploy/issues/2788#issuecomment-983806227
 function service_backup () {
   # Custom backup flags passed in as $1
-  PGPASSWORD=$DB_PASSWORD pg_dump -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" --format=custom $1 "$DB_NAME"
+  PGPASSWORD=$DB_PASSWORD pg_dump -h "$DB_HOST" -U "$DB_USER" -p "$DB_PORT" --format=custom "$DB_NAME"
+  #PGPASSWORD=psql pg_dump -h "postgres" -U "postgres" -p 5432 --format=custom "postgres"
 }
 
 function service_restore () {
