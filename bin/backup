@@ -14,7 +14,7 @@
 set -o errexit
 set -o pipefail
 set -o nounset
-#set -x # useful for debugging tests
+# set -x # useful for debugging tests
 
 
 function usage () {
