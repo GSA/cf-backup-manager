@@ -2,6 +2,8 @@
 
 Cloud Foundry application to automate backup and restore of application back end data services.
 
+See [GSA/datagov-deploy#2768](https://github.com/gsa/datagov-deploy/issues/2768) for design history.
+
 ## Usage
 
 The backup-manager runs as a Cloud Foundry application with zero instances. Most backup/restore commands should be run via [Cloud Foundry task](https://docs.cloudfoundry.org/devguide/using-tasks.html).
@@ -89,6 +91,8 @@ Once complete, you should have your database migrated to Cloud Foundry.
 
 
 ### Setup
+
+![management space diagram showing backup-manager's interaction with data services](https://raw.githubusercontent.com/GSA/datagov-compliance/main/out/generic/management-space/data.gov%20management%20space%20interactions.svg)
 
 1. Create the backup-manager-s3 service where backups will be stored
 1. Share the backup-manager-s3 service with each space you want to backup
