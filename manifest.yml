@@ -8,10 +8,11 @@ applications:
     memory: 64M
     health-check-type: process
     no-route: true
+    no-start: true
     env:
       AWS_DEFAULT_REGION: us-gov-west-1
-      DATASTORE_S3_SERVICE_NAME: datastore-backups
+      DATASTORE_S3_SERVICE_NAME: backup-manager-s3
     services:
-      - datastore-backups
+      - backup-manager-s3
       - dashboard-db
       - catalog-db
