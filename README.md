@@ -29,9 +29,10 @@ commands are available to you.
 
 ### Commands
 
-#### list [path]
+#### list [-r] [path]
 
-List the contents of the backup-manager-s3 bucket.
+List the contents of the backup-manager-s3 bucket. Specify `-r` to list the path
+recursively.
 
 #### backup <service_type> <service_name> [backup_path]
 
