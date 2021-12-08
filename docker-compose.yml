@@ -36,16 +36,41 @@ services:
               "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
               "binding_name": null,
               "credentials": {
-                "db_name": "postgres",
+                "db_name": "application_db",
                 "host": "postgres",
                 "name": "postgres",
                 "password": "psql",
                 "port": "5432",
-                "uri": "postgres://postgres:psql@postgres:5432/postgres",
-                "username": "postgres"
+                "uri": "postgres://app:psql@postgres:5432/application_db",
+                "username": "app"
               },
               "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
               "instance_name": "postgres",
+              "label": "aws-rds",
+              "name": "postgres",
+              "plan": "small-psql",
+              "provider": null,
+              "syslog_drain_url": null,
+              "tags": [
+                "database",
+                "RDS"
+              ],
+              "volume_mounts": []
+            },
+            {
+              "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
+              "binding_name": null,
+              "credentials": {
+                "db_name": "postgres_restore",
+                "host": "postgres-restore",
+                "name": "postgres-restore",
+                "password": "psql",
+                "port": "5432",
+                "uri": "postgres://app_restore:psql@postgres:5432/postgres_restore",
+                "username": "app_restore"
+              },
+              "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
+              "instance_name": "postgres-restore",
               "label": "aws-rds",
               "name": "postgres",
               "plan": "small-psql",
@@ -118,6 +143,7 @@ services:
     depends_on:
       - mysql
       - postgres
+      - postgres-restore
       - s3
     volumes:
       - .:/app
@@ -135,9 +161,20 @@ services:
   postgres:
     image: postgres:10-alpine
     environment:
+      POSTGRES_DB: application_db
+      POSTGRES_USER: app
       POSTGRES_PASSWORD: psql
     ports:
       - "5432:5432"
+
+  postgres-restore:
+    image: postgres:10-alpine
+    environment:
+      POSTGRES_DB: application_restore_db
+      POSTGRES_USER: app_restore
+      POSTGRES_PASSWORD: psql
+    ports:
+      - "5432"
 
   s3:
     image: minio/minio

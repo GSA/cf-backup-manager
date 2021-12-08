@@ -17,6 +17,8 @@ function setup () {
   VCAP_SERVICES="$(cat $(test_fixture mysql-test.vcap.json))"
   VCAP_APPLICATION="$(cat $(test_fixture vcap-application.json))"
 
+  # This line has been known to fail on local test runs and pass on github actions.
+  # The cause of failure is unknown.
   aws_helper s3api create-bucket --bucket $TEST_DATASTORE_BUCKET
 
   # Wait for mysql container to be up
@@ -33,7 +35,7 @@ function teardown () {
 @test "backup given no arguments prints usage" {
   run backup
   assert_failure
-  assert_output --partial "usage: backup ['<db_flags>'] <service_type> <service_name> [backup_path]"
+  assert_output --partial "usage: backup <service_type> <service_name> [backup_path]"
 }
 
 @test "backup mysql application-mysql-db" {

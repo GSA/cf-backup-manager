@@ -4,18 +4,43 @@
       "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
       "binding_name": null,
       "credentials": {
-        "db_name": "postgres",
+        "db_name": "application_db",
         "host": "postgres",
         "name": "postgres",
         "password": "psql",
         "port": "5432",
-        "uri": "postgres://postgres:psql@postgres:5432/postgres",
-        "username": "postgres"
+        "uri": "postgres://app:psql@postgres:5432/application_db",
+        "username": "app"
       },
       "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
-      "instance_name": "postgres",
+      "instance_name": "postgres-backup-test",
       "label": "aws-rds",
       "name": "postgres",
+      "plan": "small-mysql",
+      "provider": null,
+      "syslog_drain_url": null,
+      "tags": [
+        "database",
+        "RDS"
+      ],
+      "volume_mounts": []
+    },
+    {
+      "binding_guid": "eda9d934-a935-492a-abf5-7a2bbd126d9b",
+      "binding_name": null,
+      "credentials": {
+        "db_name": "application_restore_db",
+        "host": "postgres-restore",
+        "name": "postgres-restore-test",
+        "password": "psql",
+        "port": "5432",
+        "uri": "postgres://app_restore:psql@postgres-restore:5432/postgres_restore_db",
+        "username": "app_restore"
+      },
+      "instance_guid": "84ec223d-b3ba-4fd0-9648-08aebc8c9863",
+      "instance_name": "postgres-restore-test",
+      "label": "aws-rds",
+      "name": "postgres-restore",
       "plan": "small-mysql",
       "provider": null,
       "syslog_drain_url": null,
