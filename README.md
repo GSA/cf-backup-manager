@@ -24,6 +24,28 @@ commands are available to you.
     $ PATH=/usr/local/bin:$PATH
 
 
+### Backup and restore procedure
+
+We recommend you run a backup regularly via a scheduled CI task.
+
+    $ cf run-task backup-manager --wait --name "backup" --command "backup mysql my-service"
+
+To restore, you should create a **new** service to ensure you're restoring to
+a clean state rather than restore into an existing service.
+
+    $ cf create-service mysql micro-mysql my-service-new
+    $ cf run-task backup-manager --wait --name "restore" --command "restore mysql my-service-new /path/to/mysql-backup.gz"
+
+Then rename the old and new service.
+
+    $ cf rename-service my-service my-service-venerable
+    $ cf rename-service my-service-new my-service
+
+Restart your application.
+
+    $ cf restart my-app
+
+
 ### Supported services
 
 - mysql
@@ -48,7 +70,9 @@ form:
 
 #### restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
-Restore the named backup to the specified service.
+Restore the named backup to the specified service. In most cases, you should
+**restore to a new service** instead of restoring to an existing service and
+then rename the new service to replace the old one.
 
 ### Migrations
 
