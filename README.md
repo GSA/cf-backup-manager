@@ -33,10 +33,7 @@ commands are available to you.
 
 List the contents of the backup-manager-s3 bucket.
 
-    $ cf set-env backup-manager DATASTORE_S3_SERVICE_NAME <datastore_service>
-    $ cf bind-service backup-manager <datastore_service>
-    $ cf restart backup-manager
-    $ cf run-task backup-manager --name "catalog-restore" --command "list /"
+    $ cf run-task backup-manager --name "<run-name>" --command "list /"
     $ cf logs backup-manager --recent
 
 #### backup ['<db_flags>'] <service_type> <service_name> [backup_path]
