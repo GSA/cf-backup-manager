@@ -31,7 +31,7 @@ function teardown () {
 @test "restore given no arguments prints usage" {
   run restore
   assert_failure
-  assert_output --partial 'usage: restore <service_type> <service_name> <backup_path>'
+  assert_output --partial "usage: restore <service_type> <service_name> <backup_path>"
 }
 
 @test "restore mysql application-mysql-db" {
