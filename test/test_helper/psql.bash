@@ -28,13 +28,19 @@ function psql_initdb () {
 
 }
 
+function psql_cleandb () {
+  eval "$psql_cmd -c \"DROP TABLE bank;\""
+  eval "$psql_cmd -c \"DROP TABLE address;\""
+  eval "$psql_cmd -c \"DROP TABLE users;\""
+}
+
 function psql_datacheck_full () {
-  eval "$psql_cmd -c 'select count(*) from users;'" | grep "2 row"
-  eval "$psql_cmd -c 'select count(*) from bank;'" | grep "2 row"
-  eval "$psql_cmd -c 'select count(*) from address;'" | grep "2 row"
+  eval "$psql_cmd -c 'select * from users;'" | grep "2 row"
+  eval "$psql_cmd -c 'select * from bank;'" | grep "2 row"
+  eval "$psql_cmd -c 'select * from address;'" | grep "2 row"
 }
 
 function psql_datacheck_skip_bank () {
-  eval "$psql_cmd -c 'select count(*) from users;'" | grep "2 row"
-  eval "$psql_cmd -c 'select count(*) from address;'" | grep "2 row"
+  eval "$psql_cmd -c 'select * from users;'" | grep "2 row"
+  eval "$psql_cmd -c 'select * from address;'" | grep "2 row"
 }
