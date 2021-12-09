@@ -13,10 +13,42 @@ set -o nounset
 
 source $PROJECT_DIR/lib/core.bash
 
-# Load backup-manager-s3 creds
-eval "$(get_datastore_bucket_credentials_env)"
+function usage () {
+  cat <<EOF >&2
+usage: list [-r] [backup_path]
+
+  -r: Recursively list contents
+  backup_path:  Path to list within the s3 bucket
+
+Environment variables:
+
+  DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
+
+EOF
+}
+
+s3_options=""
+
+optstring=":r"
+while getopts ${optstring} option; do
+  case "${option}" in
+    r)
+      s3_options="--recursive"
+      ;;
+    ?)
+      echo "Invalid option: -${OPTARG:-}"
+      echo
+      usage
+      exit 1
+      ;;
+  esac
+done
+shift $((OPTIND-1))
 
 bucket_path="${1:-}"
 bucket_path="${bucket_path#/}" # Remove starting /
 
-AWS_ACCESS_KEY_ID=$DATASTORE_BUCKET_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DATASTORE_BUCKET_SECRET_ACCESS_KEY aws_cmd s3 ls s3://${DATASTORE_BUCKET_NAME}/${bucket_path}
+# Load backup-manager-s3 creds
+eval "$(get_datastore_bucket_credentials_env)"
+
+AWS_ACCESS_KEY_ID=$DATASTORE_BUCKET_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY=$DATASTORE_BUCKET_SECRET_ACCESS_KEY aws_cmd s3 ls $s3_options s3://${DATASTORE_BUCKET_NAME}/${bucket_path}

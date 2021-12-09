@@ -53,9 +53,10 @@ Restart your application.
 
 ### Commands
 
-#### list [path]
+#### list [-r] [path]
 
-List the contents of the backup-manager-s3 bucket.
+List the contents of the backup-manager-s3 bucket. Specify `-r` to list the path
+recursively.
 
     $ cf run-task backup-manager --name "<run-name>" --command "list /"
     $ cf logs backup-manager --recent

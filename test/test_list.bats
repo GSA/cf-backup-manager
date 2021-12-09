@@ -15,6 +15,12 @@ function teardown () {
   # Delete the test bucket
   aws_helper s3 rb s3://$TEST_DATASTORE_BUCKET --force
 }
+@test "list given invalid args" {
+  VCAP_SERVICES="$VCAP_SERVICES" DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3 run list -h
+  assert_failure
+  assert_output --partial "Invalid option: -h"
+  assert_output --partial "[-r] [backup_path]"
+}
 
 @test "list given an empty bucket succeeds" {
   VCAP_SERVICES="$VCAP_SERVICES" DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3 run list
@@ -47,4 +53,13 @@ function teardown () {
   VCAP_SERVICES="$VCAP_SERVICES" DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3 run list test-directory/
   assert_success
   assert_output --partial "1337 test-file"
+}
+
+@test "list -r succeeds with dir listing" {
+  # Create a test file of size 1337
+  truncate -s 1337 $BATS_TEST_TMPDIR/test-file
+  aws_helper s3 cp $BATS_TEST_TMPDIR/test-file s3://$TEST_DATASTORE_BUCKET/test-directory/test-directory/test-file
+  VCAP_SERVICES="$VCAP_SERVICES" DATASTORE_S3_SERVICE_NAME=datastore-backup-test-s3 run list -r
+  assert_success
+  assert_output --partial "1337 test-directory/test-directory/test-file"
 }
