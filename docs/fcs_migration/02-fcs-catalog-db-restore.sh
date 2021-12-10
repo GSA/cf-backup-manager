@@ -18,13 +18,21 @@ set -o nounset
 read -p "Space name> " space_name
 read -p "S3 Backup path> " backup_path
 
+function wait_for () {
+
+  while ! (cf tasks backup-manager | grep -q "$1 .*SUCCEEDED"); do
+    sleep 5
+  done
+}
+
+catalog_db_migrate=catalog-db-migrate
 # Go to the correct space
 cf target -s $space_name
 
 # Create Migration Database
 # time cf create-service aws-rds micro-psql catalog-db-migrate --wait
-time cf create-service aws-rds large-gp-psql-redundant catalog-db-fcs-large -c '{"storage": 300, "version": "12"}' --wait
-cf bind-service backup-manager catalog-db-fcs-large
+time cf create-service aws-rds large-gp-psql-redundant "$catalog_db_migrate" -c '{"storage": 300, "version": "12"}' --wait
+cf bind-service backup-manager "$catalog_db_migrate"
 
 # Connect to the database and get credentials in env
 # Ensure the service-connect plugin is installed for cf cli,
@@ -37,22 +45,25 @@ cf bind-service backup-manager catalog-db-fcs-large
 # from fuhu local ckan.
 
 # Need to bind to a running service, so if catalog is stopped use dashboard
-cf bind-service dashboard-stage catalog-db-fcs-large
-cf connect-to-service dashboard-stage catalog-db-fcs-large << EOF
+cf bind-service dashboard-stage "$catalog_db_migrate"
+cf connect-to-service dashboard-stage "$catalog_db_migrate" << EOF
 CREATE EXTENSION IF NOT EXISTS postgis;
 EOF
 
 # Restore backup
-time cf run-task backup-manager --name "catalog-restore" --command "PG_RESTORE_OPTIONS='--no-acl' restore psql catalog-db-fcs-large $backup_path"
+restore_id=$$
+time cf run-task backup-manager --name "catalog-restore-$restore_id" --command "PG_RESTORE_OPTIONS='--no-acl' restore psql $catalog_db_migrate $backup_path"
 
-cf connect-to-service dashboard-stage catalog-db-fcs-large << EOF
+wait_for "catalog-restore-$restore_id"
+
+cf connect-to-service dashboard-stage "$catalog_db_migrate" << EOF
 drop index idx_package_resource_package_id;
 drop index idx_package_resource_revision_period;
 EOF
 
 # Bind to new database
 cf rename-service catalog-db catalog-db-venerable
-cf rename-service catalog-db-fcs-large catalog-db
+cf rename-service "$catalog_db_migrate" catalog-db
 cf unbind-service catalog catalog-db-venerable
 cf bind-service catalog catalog-db
 # Undo temporary binding to dashboard to run queries
