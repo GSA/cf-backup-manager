@@ -74,4 +74,4 @@ cf unbind-service dashboard-stage catalog-db
 cf scale catalog -i 0
 cf run-task catalog -c "ckan db upgrade"
 cf scale catalog -i 2
-cf run-task catalog -c "ckan search-index rebuild"
+cf run-task catalog -c "ckan search-index rebuild -i -o -e" --name search-index-rebuild -k 2G -m 2G
