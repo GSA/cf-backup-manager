@@ -49,7 +49,7 @@ cf bind-service backup-manager ${service_name}-migrate
 cf run-task backup-manager --name "inventory-restore" --command "PG_RESTORE_OPTIONS='--no-acl' restore psql ${service_name}-migrate $backup_path" --wait
 
 # user table fix
-cf connect-to-service dashboard-stage ${service_name}-migrate << EOF
+cf connect-to-service inventory ${service_name}-migrate << EOF
 UPDATE "user" SET fullname = email WHERE fullname IS NULLor fullname = '';
 UPDATE "user" SET name = REGEXP_REPLACE(name, '[^a-zA-Z0-9-]', '_', 'g');
 EOF
