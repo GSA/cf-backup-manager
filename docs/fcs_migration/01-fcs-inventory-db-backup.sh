@@ -25,8 +25,8 @@ export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_DEFAULT_REGION
 # Source credentials for FCS environment
 source ~/.env
 
-backup_path_ckan="/fcs-migration/$space_name/${service_name}-ckan-$(date +%Y%m%d-%H%M%S)-migration.sql.gz"
-backup_path_datastore="/fcs-migration/$space_name/${service_name}-datastore-$(date +%Y%m%d-%H%M%S)-migration.sql.gz"
+backup_path_ckan="/fcs-migration/$space_name/${service_name}-ckan-$(date +%Y%m%d-%H%M%S)-migration.dump.gz"
+backup_path_datastore="/fcs-migration/$space_name/${service_name}-datastore-$(date +%Y%m%d-%H%M%S)-migration.dump.gz"
 
 time pg_dump --format=custom -h $DB_HOST_CKAN -U $DB_USER_CKAN -p $DB_PORT_CKAN datagov_Inventory_db | gzip | aws s3 cp - s3://${BUCKET_NAME}${backup_path_ckan}
 
