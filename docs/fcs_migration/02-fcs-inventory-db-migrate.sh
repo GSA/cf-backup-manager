@@ -50,7 +50,7 @@ cf run-task backup-manager --name "inventory-restore" --command "PG_RESTORE_OPTI
 
 # user table fix
 cf connect-to-service inventory ${service_name}-migrate << EOF
-UPDATE "user" SET fullname = email WHERE fullname IS NULLor fullname = '';
+UPDATE "user" SET fullname = email WHERE fullname IS NULL or fullname = '';
 UPDATE "user" SET name = REGEXP_REPLACE(name, '[^a-zA-Z0-9-]', '_', 'g');
 EOF
 
