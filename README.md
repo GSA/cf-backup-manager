@@ -2,6 +2,8 @@
 
 Cloud Foundry application to automate backup and restore of application back end data services.
 
+See [GSA/datagov-deploy#2768](https://github.com/gsa/datagov-deploy/issues/2768) for design history.
+
 ## Usage
 
 The backup-manager runs as a Cloud Foundry application with zero instances. Most backup/restore commands should be run via [Cloud Foundry task](https://docs.cloudfoundry.org/devguide/using-tasks.html).
@@ -22,6 +24,28 @@ commands are available to you.
     $ PATH=/usr/local/bin:$PATH
 
 
+### Backup and restore procedure
+
+We recommend you run a backup regularly via a scheduled CI task.
+
+    $ cf run-task backup-manager --wait --name "backup" --command "backup mysql my-service"
+
+To restore, you should create a **new** service to ensure you're restoring to
+a clean state rather than restore into an existing service.
+
+    $ cf create-service mysql micro-mysql my-service-new
+    $ cf run-task backup-manager --wait --name "restore" --command "restore mysql my-service-new /path/to/mysql-backup.gz"
+
+Then rename the old and new service.
+
+    $ cf rename-service my-service my-service-venerable
+    $ cf rename-service my-service-new my-service
+
+Restart your application.
+
+    $ cf restart my-app
+
+
 ### Supported services
 
 - mysql
@@ -29,11 +53,15 @@ commands are available to you.
 
 ### Commands
 
-#### list [path]
+#### list [-r] [path]
 
-List the contents of the backup-manager-s3 bucket.
+List the contents of the backup-manager-s3 bucket. Specify `-r` to list the path
+recursively.
 
-#### backup <service_type> <service_name> [backup_path]
+    $ cf run-task backup-manager --name "<run-name>" --command "list /"
+    $ cf logs backup-manager --recent
+
+#### backup ['<db_flags>'] <service_type> <service_name> [backup_path]
 
 Create a backup for the named service. You must specify the service type e.g.
 mysql. If you don't provide a backup path, then one will be generated in the
@@ -41,9 +69,11 @@ form:
 
 > /backup-manager-v1/$space/$service_name/$service_name-$datetime-backup.gz
 
-#### restore <service_type> <service_name> <backup_path>
+#### restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
-Restore the named backup to the specified service.
+Restore the named backup to the specified service. In most cases, you should
+**restore to a new service** instead of restoring to an existing service and
+then rename the new service to replace the old one.
 
 ### Migrations
 
@@ -86,6 +116,8 @@ Once complete, you should have your database migrated to Cloud Foundry.
 
 
 ### Setup
+
+![management space diagram showing backup-manager's interaction with data services](https://raw.githubusercontent.com/GSA/datagov-compliance/main/out/generic/management-space/data.gov%20management%20space%20interactions.svg)
 
 1. Create the backup-manager-s3 service where backups will be stored
 1. Share the backup-manager-s3 service with each space you want to backup

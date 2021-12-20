@@ -15,5 +15,8 @@ production:
 test:
 	docker-compose run --rm app test/bats/bin/bats $(BATS_ARGS) test/*.bats
 
+up:
+	docker-compose up -d
+
 
 .PHONY: test
