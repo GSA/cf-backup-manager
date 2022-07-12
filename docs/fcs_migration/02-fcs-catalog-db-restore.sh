@@ -76,4 +76,4 @@ cf connect-to-service backup-manager catalog-db << EOF
 ANALYZE;
 EOF
 cf scale catalog -i 2
-cf run-task catalog -c "ckan search-index rebuild -i -o -e" --name search-index-rebuild -k 2G -m 2G
+cf run-task catalog -c "ckan search-index rebuild -i -o" --name search-index-rebuild -k 2G -m 2G
