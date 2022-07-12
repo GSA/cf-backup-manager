@@ -69,8 +69,11 @@ cf rename-service "$catalog_db_migrate" catalog-db
 cf unbind-service catalog catalog-db-venerable
 cf bind-service catalog catalog-db
 
-# # Upgrade DB and reindex SOLR
+# # Upgrade and analyze DB, and reindex SOLR
 cf scale catalog -i 0
 cf run-task catalog -c "ckan db upgrade"
+cf connect-to-service backup-manager catalog-db << EOF
+ANALYZE;
+EOF
 cf scale catalog -i 2
-cf run-task catalog -c "ckan search-index rebuild -i -o -e" --name search-index-rebuild -k 2G -m 2G
+cf run-task catalog -c "ckan search-index rebuild -i -o" --name search-index-rebuild -k 2G -m 2G
