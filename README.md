@@ -30,6 +30,8 @@ We recommend you run a backup regularly via a scheduled CI task.
 
     $ cf run-task backup-manager --wait --name "backup" --command "backup mysql my-service"
 
+    $ cf run-task backup-manager  --name "backup" --command "backup psql my-service <backup_path>"
+
 To restore, you should create a **new** service to ensure you're restoring to
 a clean state rather than restore into an existing service.
 
