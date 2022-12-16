@@ -52,41 +52,41 @@ update public.group_extra set value = CONCAT(MD5(value), '@localdomain.local') w
 EOF
 fi
 
-# # rename database
-# cf rename-service catalog-db catalog-db-venerable
-# cf rename-service catalog-db-new catalog-db
+# rename database
+cf rename-service catalog-db catalog-db-venerable
+cf rename-service catalog-db-new catalog-db
 
-# # clear solr indexes
-# clear_id=$$
-# cf run-task catalog-admin --name "clear-solr-index-$clear_id" -c "ckan search-index clear" 
+# clear solr indexes
+clear_id=$$
+cf run-task catalog-admin --name "clear-solr-index-$clear_id" -c "ckan search-index clear" 
 
-# wait_for "clear-solr-index-$clear_id"
+wait_for "clear-solr-index-$clear_id"
 
-# # bind to new database
-# cf unbind-service catalog-admin catalog-db-venerable
-# cf bind-service catalog-admin catalog-db
-# cf restart catalog-admin
+# bind to new database
+cf unbind-service catalog-admin catalog-db-venerable
+cf bind-service catalog-admin catalog-db
+cf restart catalog-admin
 
-# # # analyze DB
-# cf connect-to-service backup-manager catalog-db << EOF
-# ANALYZE;
-# EOF
+# # analyze DB
+cf connect-to-service backup-manager catalog-db << EOF
+ANALYZE;
+EOF
 
-# # bind other services
-# cf unbind-service catalog-web catalog-db-venerable
-# cf bind-service catalog-web catalog-db
-# cf restart catalog-web
+# bind other services
+cf unbind-service catalog-web catalog-db-venerable
+cf bind-service catalog-web catalog-db
+cf restart catalog-web
 
-# cf unbind-service catalog-gather catalog-db-venerable
-# cf bind-service catalog-gather catalog-db
-# cf restart catalog-gather
+cf unbind-service catalog-gather catalog-db-venerable
+cf bind-service catalog-gather catalog-db
+cf restart catalog-gather
 
-# cf unbind-service catalog-fetch catalog-db-venerable
-# cf bind-service catalog-fetch catalog-db
-# cf restart catalog-fetch
+cf unbind-service catalog-fetch catalog-db-venerable
+cf bind-service catalog-fetch catalog-db
+cf restart catalog-fetch
 
-# # reindex solr
-# cf run-task catalog-admin -c "ckan search-index rebuild -i -o" --name search-index-rebuild -k 2G -m 2G
+# reindex solr
+cf run-task catalog-admin -c "ckan search-index rebuild -i -o" --name search-index-rebuild -k 2G -m 2G
 
-# # cleanup
-# cf delete-service catalog-db-venerable
+# cleanup
+cf delete-service catalog-db-venerable
