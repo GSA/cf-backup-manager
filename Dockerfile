@@ -7,7 +7,8 @@ RUN apk update && apk add \
   mysql-client \
   ncurses \
   postgresql-client \
-  python3
+  python3 \
+  redis
 
 COPY bin/ /usr/local/bin/
 
