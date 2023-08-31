@@ -51,6 +51,7 @@ Restart your application.
 ### Supported services
 
 - mysql
+- pgsql
 
 
 ### Commands
