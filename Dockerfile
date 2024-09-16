@@ -1,4 +1,4 @@
-FROM alpine:3.14
+FROM alpine:3.17
 
 RUN apk update && apk add \
   aws-cli \
@@ -9,7 +9,7 @@ RUN apk update && apk add \
   postgresql-client \
   python3 \
   redis \
-  stunnel
+  stunnel 
 
 # Add local scripts to global scope
 COPY bin/ /usr/local/bin/
