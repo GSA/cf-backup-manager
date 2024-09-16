@@ -4,19 +4,21 @@
 BATS_ARGS:=--recursive --pretty
 
 build:
-	docker-compose build
+	docker compose build
 
 clean:
-	docker-compose down -v --remove-orphans
+	docker compose down -v --remove-orphans
 
 production:
 	docker build . -t ghcr.io/gsa/cf-backup-manager:latest
 
 test:
-	docker-compose run --rm app test/bats/bin/bats $(BATS_ARGS) test/*.bats
+	docker compose run --rm app test/bats/bin/bats $(BATS_ARGS) test/*.bats
 
 up:
-	docker-compose up -d
+	docker compose up -d
 
+down:
+	docker compose down
 
 .PHONY: test
