@@ -11,6 +11,7 @@ set -o nounset
 read -p "Space name> " space_name
 read -p "S3 Backup path> " backup_path
 read -p "Storage size for new db> " storage_size
+read -p "Service plan> " db_plan
 
 function wait_for () {
   while ! (cf tasks backup-manager | grep -q "$1 .*SUCCEEDED"); do
@@ -23,15 +24,11 @@ cf set-env backup-manager DATASTORE_S3_SERVICE_NAME backup-manager-s3
 # Go to the correct space
 cf target -s $space_name
 
-# # create temp Database
-if [[ "${space_name}" == 'prod' ]]; then
-  db_plan=large-gp-psql-redundant
-else
-  db_plan=large-gp-psql
-fi
-cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"12\"}" --wait
+cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"15\"}" --wait
 cf bind-service backup-manager catalog-db-new
 cf restart backup-manager
+
+cf scale backup-manager -i 1
 
 # # Restore backup
 restore_id=$$
@@ -56,12 +53,6 @@ fi
 cf rename-service catalog-db catalog-db-venerable
 cf rename-service catalog-db-new catalog-db
 
-# clear solr indexes
-clear_id=$$
-cf run-task catalog-admin --name "clear-solr-index-$clear_id" -c "ckan search-index clear" 
-
-wait_for "clear-solr-index-$clear_id"
-
 # bind to new database
 cf unbind-service catalog-admin catalog-db-venerable
 cf bind-service catalog-admin catalog-db
@@ -85,8 +76,6 @@ cf unbind-service catalog-fetch catalog-db-venerable
 cf bind-service catalog-fetch catalog-db
 cf restart catalog-fetch
 
-# reindex solr
-cf run-task catalog-admin -c "ckan search-index rebuild -i -o" --name search-index-rebuild -k 2G -m 2G
-
 # cleanup
 cf delete-service catalog-db-venerable
+cf scale backup-manager -i 0
