@@ -23,15 +23,15 @@ cf set-env backup-manager DATASTORE_S3_SERVICE_NAME backup-manager-s3
 # Go to the correct space
 cf target -s $space_name
 
-# # create temp Database
-if [[ "${space_name}" == 'prod' ]]; then
-  db_plan=large-gp-psql-redundant
-else
-  db_plan=large-gp-psql
-fi
-cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"12\"}" --wait
-cf bind-service backup-manager catalog-db-new
-cf restart backup-manager
+# # # create temp Database
+# if [[ "${space_name}" == 'prod' ]]; then
+#   db_plan=large-gp-psql-redundant
+# else
+#   db_plan=large-gp-psql
+# fi
+# cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"12\"}" --wait
+# cf bind-service backup-manager catalog-db-new
+# cf restart backup-manager
 
 # # Restore backup
 restore_id=$$
