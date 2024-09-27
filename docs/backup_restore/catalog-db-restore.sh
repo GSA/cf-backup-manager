@@ -12,6 +12,7 @@ read -p "Space name> " space_name
 read -p "S3 Backup path> " backup_path
 read -p "Storage size for new db> " storage_size
 read -p "Service plan> " db_plan
+read -p "DB Version> " db_version
 
 function wait_for () {
   while ! (cf tasks backup-manager | grep -q "$1 .*SUCCEEDED"); do
@@ -24,7 +25,7 @@ cf set-env backup-manager DATASTORE_S3_SERVICE_NAME backup-manager-s3
 # Go to the correct space
 cf target -s $space_name
 
-cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"15\"}" --wait
+cf create-service aws-rds ${db_plan} catalog-db-new -c "{\"storage\": ${storage_size}, \"version\": \"${db_version}\"}" --wait
 cf bind-service backup-manager catalog-db-new
 cf restart backup-manager
 
