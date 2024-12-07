@@ -15,4 +15,11 @@ applications:
     services:
       - backup-manager-s3
       - dashboard-db
+      - dashboard-s3
       - catalog-db
+      - catalog-redis
+      - inventory-datastore
+      - inventory-db
+      - inventory-redis
+      - inventory-s3
+
