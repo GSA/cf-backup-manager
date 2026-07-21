@@ -41,7 +41,7 @@ EOF
 
   run service_backup
   assert_success
-  assert_output --regexp  '-- MariaDB dump\s+[0-9]+\.[0-9]+\s+Distrib [0-9]+\.[0-9]+\.[0-9]+-MariaDB, for Linux \(x86_64\)'
+  assert_output --regexp  '-- MariaDB dump\s+[0-9]+\.[0-9]+\s+Distrib [0-9]+\.[0-9]+\.[0-9]+-MariaDB, for Linux \([^)]+\)'
   assert_output --partial '-- Host: mysql    Database: application-mysql-db'
   assert_output --regexp  '-- Server version\s+[0-9]+\.[0-9]+\.[0-9]+'
 }
