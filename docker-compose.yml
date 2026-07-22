@@ -6,6 +6,7 @@ services:
     environment:
       DATAGOV_BACKUP_S3_SERVICE: datastore-backup-s3
       DATASTORE_BUCKET_ENDPOINT: http://s3:9000
+      MYSQL_OPTIONS: --skip-ssl
       TERM: ${TERM:-xterm}
       VCAP_APPLICATION: |
         {
@@ -149,27 +150,28 @@ services:
       - .:/app
 
   mysql:
-    image: mysql:5
+    image: mysql:8.4.9
     platform: linux/amd64
+    command: --mysql-native-password=ON --authentication-policy=mysql_native_password
     environment:
       MYSQL_USER: app
       MYSQL_DATABASE: application-mysql-db
       MYSQL_PASSWORD: mysql-password
       MYSQL_ALLOW_EMPTY_PASSWORD: 1
     ports:
-      - "3306:3306"
+      - "3306"
 
   postgres:
-    image: postgres:10-alpine
+    image: postgres:18.3-alpine
     environment:
       POSTGRES_DB: application_db
       POSTGRES_USER: app
       POSTGRES_PASSWORD: psql
     ports:
-      - "5432:5432"
+      - "5432"
 
   postgres-restore:
-    image: postgres:10-alpine
+    image: postgres:18.3-alpine
     environment:
       POSTGRES_DB: application_restore_db
       POSTGRES_USER: app_restore
