@@ -56,5 +56,9 @@ eval "$(get_datastore_bucket_credentials_env)"
 eval "$(service_get_credentials_env $service_name)"
 
 echo "restoring $service_name ($service_type) from /$backup_path..."
-time AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp s3://$DATASTORE_BUCKET_NAME/${backup_path} - | gunzip | service_restore
+if declare -f service_restore_from_datastore > /dev/null; then
+  time service_restore_from_datastore "$backup_path"
+else
+  time AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp s3://$DATASTORE_BUCKET_NAME/${backup_path} - | gunzip | service_restore
+fi
 echo ok

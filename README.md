@@ -51,6 +51,8 @@ Restart your application.
 ### Supported services
 
 - mysql
+- psql
+- s3
 
 
 ### Commands
@@ -71,11 +73,18 @@ form:
 
 > /backup-manager-v1/$space/$service_name/$service_name-$datetime-backup.gz
 
+For `s3` services, the backup path is treated as a prefix in the backup bucket.
+Objects from the source bucket are copied under that prefix with their original
+keys preserved.
+
 #### restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
 Restore the named backup to the specified service. In most cases, you should
 **restore to a new service** instead of restoring to an existing service and
 then rename the new service to replace the old one.
+
+For `s3` services, objects under the backup prefix are copied into the target
+bucket with that prefix removed.
 
 ### Migrations
 

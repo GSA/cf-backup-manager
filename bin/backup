@@ -47,7 +47,11 @@ shift
 service_name="$1"
 shift
 
-backup_path="backup-manager-v1/$space_name/$service_name/${service_name}-$(date +%Y%m%d%H%M%S)-backup.gz"
+if [[ "$service_type" == "s3" ]]; then
+  backup_path="backup-manager-v1/$space_name/$service_name/${service_name}-$(date +%Y%m%d%H%M%S)-backup"
+else
+  backup_path="backup-manager-v1/$space_name/$service_name/${service_name}-$(date +%Y%m%d%H%M%S)-backup.gz"
+fi
 if [[ "$#" -gt 0 ]]; then
   backup_path="$1"
   shift
@@ -63,5 +67,9 @@ eval "$(get_datastore_bucket_credentials_env)"
 eval "$(service_get_credentials_env $service_name)"
 
 echo "backing up $service_name ($service_type) to $backup_path..."
-time service_backup | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
+if declare -f service_backup_to_datastore > /dev/null; then
+  time service_backup_to_datastore "$backup_path"
+else
+  time service_backup | gzip | AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" aws_cmd s3 cp - s3://${DATASTORE_BUCKET_NAME}${backup_path}
+fi
 echo ok
