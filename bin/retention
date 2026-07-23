@@ -32,6 +32,8 @@ fi
 days="$1"
 shift
 prefix="$1"
+rule_id="backup-manager-retention-${days}-days-${prefix//[^[:alnum:]]/-}"
+rule_id="${rule_id:0:255}"
 
 if ! [[ "$days" =~ ^[0-9]+$ ]] || [[ "$days" -lt 1 ]]; then
   echo "days must be a positive integer" >&2
@@ -42,23 +44,37 @@ fi
 source $PROJECT_DIR/lib/core.bash
 eval "$(get_datastore_bucket_credentials_env)"
 
+existing_config="$(env_file s3-lifecycle-existing.json)"
 config="$(env_file s3-lifecycle-retention.json)"
-cat > "$config" <<EOF
-{
-  "Rules": [
-    {
-      "ID": "backup-manager-retention-${days}-days",
-      "Status": "Enabled",
-      "Filter": {
-        "Prefix": "${prefix}"
-      },
-      "Expiration": {
-        "Days": ${days}
-      }
+error_file="$(env_file s3-lifecycle-error.txt)"
+
+if ! AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" \
+  AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" \
+  AWS_DEFAULT_REGION="$DATASTORE_BUCKET_REGION" \
+  aws_cmd s3api get-bucket-lifecycle-configuration \
+    --bucket "$DATASTORE_BUCKET_NAME" > "$existing_config" 2> "$error_file"; then
+  if grep -q "NoSuchLifecycleConfiguration" "$error_file"; then
+    echo '{"Rules":[]}' > "$existing_config"
+  else
+    cat "$error_file" >&2
+    exit 1
+  fi
+fi
+
+jq \
+  --arg id "$rule_id" \
+  --arg prefix "$prefix" \
+  --argjson days "$days" \
+  '.Rules = ((.Rules // []) | map(select(.ID != $id)) + [{
+    "ID": $id,
+    "Status": "Enabled",
+    "Filter": {
+      "Prefix": $prefix
+    },
+    "Expiration": {
+      "Days": $days
     }
-  ]
-}
-EOF
+  }])' "$existing_config" > "$config"
 
 AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" \
   AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" \

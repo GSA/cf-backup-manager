@@ -28,7 +28,21 @@ function teardown () {
   run aws_helper s3api get-bucket-lifecycle-configuration --bucket $TEST_DATASTORE_BUCKET
 
   assert_success
-  assert_output --partial '"ID": "backup-manager-retention-90-days"'
+  assert_output --partial '"ID": "backup-manager-retention-90-days-backup-manager-v1-development-application-s3-test-"'
   assert_output --partial '"Prefix": "backup-manager-v1/development/application-s3-test/"'
   assert_output --partial '"Days": 90'
+}
+
+@test "retention preserves existing lifecycle rules for other prefixes" {
+  run retention 90 backup-manager-v1/development/application-s3-test/
+  assert_success
+
+  run retention 90 backup-manager-v1/prod/catalog-s3/
+  assert_success
+
+  run aws_helper s3api get-bucket-lifecycle-configuration --bucket $TEST_DATASTORE_BUCKET
+
+  assert_success
+  assert_output --partial '"Prefix": "backup-manager-v1/development/application-s3-test/"'
+  assert_output --partial '"Prefix": "backup-manager-v1/prod/catalog-s3/"'
 }
