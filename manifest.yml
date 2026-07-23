@@ -15,5 +15,3 @@ applications:
       DATASTORE_S3_SERVICE_NAME: backup-manager-s3
     services:
       - backup-manager-s3
-      - dashboard-db
-      - catalog-db
