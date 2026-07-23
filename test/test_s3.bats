@@ -67,6 +67,13 @@ function seed_source_bucket () {
   assert_output --partial 'file.txt'
 }
 
+@test "backup s3 refuses datastore bucket" {
+  run backup s3 datastore-backup-test-s3 /backup-bucket-copy
+
+  assert_failure
+  assert_output --partial 'refusing to back up datastore bucket datastore-backup-test'
+}
+
 @test "restore s3 application-s3-restore-test" {
   mkdir -p "$BATS_TEST_TMPDIR/nested"
   printf 'alpha' > "$BATS_TEST_TMPDIR/file.txt"

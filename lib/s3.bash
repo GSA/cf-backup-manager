@@ -34,6 +34,10 @@ function service_backup_to_datastore () {
   backup_path="$(_s3_normalize_prefix "$1")"
   backup_prefix="$backup_path"
 
+  if [[ "$S3_BUCKET_NAME" == "$DATASTORE_BUCKET_NAME" ]]; then
+    fatal "refusing to back up datastore bucket $DATASTORE_BUCKET_NAME"
+  fi
+
   while IFS= read -r key; do
     [[ -z "$key" ]] && continue
 
