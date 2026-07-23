@@ -86,6 +86,27 @@ then rename the new service to replace the old one.
 For `s3` services, objects under the backup prefix are copied into the target
 bucket with that prefix removed.
 
+#### retention <days> [prefix]
+
+Configure lifecycle expiration on the backup-manager S3 bucket for the given
+prefix. Choose the narrowest backup prefix you can so unrelated files in the
+backup bucket are kept.
+
+    $ cf run-task backup-manager --wait --name "backup-retention" --command "retention 90 backup-manager-v1/prod/<source-s3-service-name>/"
+
+### Scheduled S3 Backups
+
+The `backup-s3` GitHub Actions workflow runs every Sunday at 07:00 UTC. It
+configures 90-day lifecycle retention for that source service's generated
+backup prefix and then creates a full backup of the configured source S3 bucket.
+
+Configure the production GitHub environment variable
+`S3_BACKUP_SERVICE_NAME` with the source S3 service instance name. The source
+S3 service must be bound to the `backup-manager` app.
+
+    $ cf target -s prod
+    $ cf bind-service backup-manager <source-s3-service-name>
+
 ### Migrations
 
 You can also use this application to migrate databases from outside of Cloud

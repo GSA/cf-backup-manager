@@ -1,0 +1,70 @@
+#!/bin/bash
+#
+# Configure lifecycle retention for the backup-manager S3 bucket.
+#
+# Usage:
+#   retention <days> <prefix>
+#
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+function usage () {
+  cat <<EOF >&2
+usage: retention <days> <prefix>
+
+  days:    number of days to retain objects in the backup bucket
+  prefix:  backup bucket prefix to expire
+
+Environment variables:
+
+  DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
+
+EOF
+}
+
+if [[ "$#" -lt 2 ]]; then
+  usage
+  exit 1
+fi
+
+days="$1"
+shift
+prefix="$1"
+
+if ! [[ "$days" =~ ^[0-9]+$ ]] || [[ "$days" -lt 1 ]]; then
+  echo "days must be a positive integer" >&2
+  usage
+  exit 1
+fi
+
+source $PROJECT_DIR/lib/core.bash
+eval "$(get_datastore_bucket_credentials_env)"
+
+config="$(env_file s3-lifecycle-retention.json)"
+cat > "$config" <<EOF
+{
+  "Rules": [
+    {
+      "ID": "backup-manager-retention-${days}-days",
+      "Status": "Enabled",
+      "Filter": {
+        "Prefix": "${prefix}"
+      },
+      "Expiration": {
+        "Days": ${days}
+      }
+    }
+  ]
+}
+EOF
+
+AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" \
+  AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" \
+  AWS_DEFAULT_REGION="$DATASTORE_BUCKET_REGION" \
+  aws_cmd s3api put-bucket-lifecycle-configuration \
+    --bucket "$DATASTORE_BUCKET_NAME" \
+    --lifecycle-configuration "file://$config"
+
+echo "configured $DATASTORE_BUCKET_NAME retention: expire ${prefix} after ${days} days"
