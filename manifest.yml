@@ -11,6 +11,7 @@ applications:
     no-start: true
     env:
       AWS_DEFAULT_REGION: us-gov-west-1
+      BACKUP_PREFIX: backup-manager-v1
       DATASTORE_S3_SERVICE_NAME: backup-manager-s3
     services:
       - backup-manager-s3

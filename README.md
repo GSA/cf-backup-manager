@@ -71,7 +71,9 @@ Create a backup for the named service. You must specify the service type e.g.
 mysql. If you don't provide a backup path, then one will be generated in the
 form:
 
-> /backup-manager-v1/$space/$service_name/$service_name-$datetime-backup.gz
+> /$BACKUP_PREFIX/$space/$service_name/$service_name-$datetime-backup.gz
+
+`BACKUP_PREFIX` defaults to `backup-manager-v1`.
 
 For `s3` services, the backup path is treated as a prefix in the backup bucket.
 Objects from the source bucket are copied under that prefix with their original
@@ -100,9 +102,19 @@ The `backup-s3` GitHub Actions workflow runs every Sunday at 07:00 UTC. It
 configures 90-day lifecycle retention for that source service's generated
 backup prefix and then creates a full backup of the configured source S3 bucket.
 
+Any backup written under a retained prefix expires after 90 days, including
+manual commands that use the generated default path such as
+`backup psql inventory-db`. To keep a backup longer, pass an explicit path
+outside the retained prefix.
+
 Configure the production GitHub environment variable
 `S3_BACKUP_SERVICE_NAME` with the source S3 service instance name. The source
 S3 service must be bound to the `backup-manager` app.
+
+The workflow uses `BACKUP_PREFIX=backup-manager-v1` for generated backup and
+retention paths. Change that workflow environment value and the app
+`BACKUP_PREFIX` environment variable together if you need a different base
+prefix.
 
     $ cf target -s prod
     $ cf bind-service backup-manager <source-s3-service-name>

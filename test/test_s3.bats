@@ -53,6 +53,20 @@ function seed_source_bucket () {
   assert_output 'beta'
 }
 
+@test "backup s3 uses configured backup prefix" {
+  seed_source_bucket
+
+  BACKUP_PREFIX=custom-backups run backup s3 application-s3-test
+
+  assert_success
+  assert_output --partial 'backing up application-s3-test (s3) to /custom-backups/development/application-s3-test/application-s3-test-'
+
+  run aws_helper s3 ls s3://$TEST_DATASTORE_BUCKET/custom-backups/development/application-s3-test/ --recursive
+
+  assert_success
+  assert_output --partial 'file.txt'
+}
+
 @test "restore s3 application-s3-restore-test" {
   mkdir -p "$BATS_TEST_TMPDIR/nested"
   printf 'alpha' > "$BATS_TEST_TMPDIR/file.txt"

@@ -19,6 +19,8 @@ jobs:
     name: backup S3 bucket
     runs-on: ubuntu-latest
     environment: production
+    env:
+      BACKUP_PREFIX: backup-manager-v1
 
     steps:
       - name: configure 90 day backup retention
@@ -28,7 +30,7 @@ jobs:
             run-task backup-manager
             --wait
             --name s3-retention-${{ github.run_id }}
-            --command "retention 90 backup-manager-v1/prod/${{ vars.S3_BACKUP_SERVICE_NAME }}/"
+            --command "retention 90 ${{ env.BACKUP_PREFIX }}/prod/${{ vars.S3_BACKUP_SERVICE_NAME }}/"
           org: gsa-datagov
           space: prod
           user: ${{ secrets.CF_SERVICE_USER }}
