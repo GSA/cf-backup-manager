@@ -10,15 +10,22 @@ on:
 permissions:
   contents: read
 
-concurrency:
-  group: backup-s3-production
-  cancel-in-progress: false
-
 jobs:
   backup:
-    name: backup S3 bucket
+    name: backup ${{ matrix.service_name }} (${{ matrix.cf_space }})
     runs-on: ubuntu-latest
-    environment: production
+    environment: ${{ matrix.cf_space == 'prod' && 'production' || matrix.cf_space }}
+    concurrency:
+      group: backup-s3-${{ matrix.cf_space }}-${{ matrix.service_name }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        cf_space:
+          - development
+          - staging
+          - prod
+        service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
     env:
       BACKUP_PREFIX: backup-manager-v1
 
@@ -29,10 +36,10 @@ jobs:
           command: >
             run-task backup-manager
             --wait
-            --name s3-retention-${{ github.run_id }}
-            --command "retention 90 ${{ env.BACKUP_PREFIX }}/prod/${{ vars.S3_BACKUP_SERVICE_NAME }}/"
+            --name s3-retention-${{ matrix.service_name }}-${{ github.run_id }}
+            --command "retention 90 ${{ env.BACKUP_PREFIX }}/${{ matrix.cf_space }}/${{ matrix.service_name }}/"
           org: gsa-datagov
-          space: prod
+          space: ${{ matrix.cf_space }}
           user: ${{ secrets.CF_SERVICE_USER }}
           password: ${{ secrets.CF_SERVICE_AUTH }}
 
@@ -42,9 +49,9 @@ jobs:
           command: >
             run-task backup-manager
             --wait
-            --name backup-s3-${{ github.run_id }}
-            --command "backup s3 ${{ vars.S3_BACKUP_SERVICE_NAME }}"
+            --name backup-s3-${{ matrix.service_name }}-${{ github.run_id }}
+            --command "backup s3 ${{ matrix.service_name }}"
           org: gsa-datagov
-          space: prod
+          space: ${{ matrix.cf_space }}
           user: ${{ secrets.CF_SERVICE_USER }}
           password: ${{ secrets.CF_SERVICE_AUTH }}
