@@ -32,6 +32,8 @@ We recommend you run a backup regularly via a scheduled CI task.
 
     $ cf run-task backup-manager  --name "backup" --command "backup psql my-service <backup_path>"
 
+RDS database routine backups through this app are optional. cloud.gov support can provide database backup using the underlying AWS-managed database service features.
+
 To restore, you should create a **new** service to ensure you're restoring to
 a clean state rather than restore into an existing service.
 
@@ -51,6 +53,8 @@ Restart your application.
 ### Supported services
 
 - mysql
+- psql
+- s3
 
 
 ### Commands
@@ -69,13 +73,60 @@ Create a backup for the named service. You must specify the service type e.g.
 mysql. If you don't provide a backup path, then one will be generated in the
 form:
 
-> /backup-manager-v1/$space/$service_name/$service_name-$datetime-backup.gz
+> /$BACKUP_PREFIX/$space/$service_name/$service_name-$datetime-backup.gz
+
+`BACKUP_PREFIX` defaults to `backup-manager-v1`.
+
+For `s3` services, the backup path is treated as a prefix in the backup bucket.
+Objects from the source bucket are copied under that prefix with their original
+keys preserved.
 
 #### restore ['<db_flags>'] <service_type> <service_name> <backup_path>
 
 Restore the named backup to the specified service. In most cases, you should
 **restore to a new service** instead of restoring to an existing service and
 then rename the new service to replace the old one.
+
+For `s3` services, objects under the backup prefix are copied into the target
+bucket with that prefix removed.
+
+#### retention <days> <prefix>
+
+Configure lifecycle expiration on the backup-manager S3 bucket for the given
+prefix. Choose the narrowest backup prefix you can so unrelated files in the
+backup bucket are kept.
+
+    $ cf run-task backup-manager --wait --name "backup-retention" --command "retention 90 backup-manager-v1/<space>/<source-s3-service-name>/"
+
+### Scheduled S3 Backups
+
+The `backup-s3` GitHub Actions workflow runs every Sunday at 07:00 UTC. It
+backs up the S3 services listed in the `S3_BACKUP_SERVICE_NAMES` GitHub Actions
+variable in the `development`, `staging`, and `prod` cloud.gov spaces. For each
+source service, the workflow configures 90-day lifecycle retention for that
+service's generated backup prefix and then creates a full bucket backup.
+
+Any backup written under a retained S3 service prefix expires after 90 days,
+including manual commands that use the generated default path such as
+`backup s3 inventory-s3`. To keep a backup longer, pass an explicit path outside
+the retained S3 service prefixes.
+
+The source S3 services must be bound to the `backup-manager` app in each target
+space.
+
+Configure `S3_BACKUP_SERVICE_NAMES` as a repository or organization variable
+with a JSON array value:
+
+    ["inventory-s3","datagov-catalog-s3"]
+
+The workflow uses `BACKUP_PREFIX=backup-manager-v1` for generated backup and
+retention paths. Change that workflow environment value and the app
+`BACKUP_PREFIX` environment variable together if you need a different base
+prefix.
+
+    $ cf target -s <space>
+    $ cf bind-service backup-manager inventory-s3
+    $ cf bind-service backup-manager datagov-catalog-s3
 
 ### Migrations
 

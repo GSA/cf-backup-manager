@@ -1,0 +1,57 @@
+---
+name: backup-s3
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Sundays at 07:00 UTC.
+    - cron: "0 7 * * 0"
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    name: backup ${{ matrix.service_name }} (${{ matrix.cf_space }})
+    runs-on: ubuntu-latest
+    environment: ${{ matrix.cf_space == 'prod' && 'production' || matrix.cf_space }}
+    concurrency:
+      group: backup-s3-${{ matrix.cf_space }}-${{ matrix.service_name }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        cf_space:
+          - development
+          - staging
+          - prod
+        service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
+    env:
+      BACKUP_PREFIX: backup-manager-v1
+
+    steps:
+      - name: configure 90 day backup retention
+        uses: usds/cloud-gov-cli@master
+        with:
+          command: >
+            run-task backup-manager
+            --wait
+            --name s3-retention-${{ matrix.service_name }}-${{ github.run_id }}
+            --command "retention 90 ${{ env.BACKUP_PREFIX }}/${{ matrix.cf_space }}/${{ matrix.service_name }}/"
+          org: gsa-datagov
+          space: ${{ matrix.cf_space }}
+          user: ${{ secrets.CF_SERVICE_USER }}
+          password: ${{ secrets.CF_SERVICE_AUTH }}
+
+      - name: backup source S3 bucket
+        uses: usds/cloud-gov-cli@master
+        with:
+          command: >
+            run-task backup-manager
+            --wait
+            --name backup-s3-${{ matrix.service_name }}-${{ github.run_id }}
+            --command "backup s3 ${{ matrix.service_name }}"
+          org: gsa-datagov
+          space: ${{ matrix.cf_space }}
+          user: ${{ secrets.CF_SERVICE_USER }}
+          password: ${{ secrets.CF_SERVICE_AUTH }}
