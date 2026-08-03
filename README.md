@@ -95,6 +95,8 @@ bucket with that prefix removed.
 The `backup-s3` GitHub Actions workflow runs every Sunday at 07:00 UTC. It
 backs up the S3 services listed in the `S3_BACKUP_SERVICE_NAMES` GitHub Actions
 variable in the `development`, `staging`, and `prod` cloud.gov spaces.
+Manual workflow runs prompt for a cloud.gov space and S3 service to back up.
+Choose `all` for either input to run every configured space or service.
 
 The backup-manager S3 bucket must have a 90-day lifecycle expiration rule for
 the `backup-manager-90-day-retention/` prefix. This rule is managed outside this app because

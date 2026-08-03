@@ -3,6 +3,24 @@ name: backup-s3
 
 on:
   workflow_dispatch:
+    inputs:
+      cf_space:
+        description: cloud.gov space to back up
+        required: true
+        type: choice
+        options:
+          - all
+          - development
+          - staging
+          - prod
+      service_name:
+        description: S3 service to back up
+        required: true
+        type: choice
+        options:
+          - all
+          - inventory-s3
+          - datagov-catalog-s3
   schedule:
     # Sundays at 07:00 UTC.
     - cron: "0 7 * * 0"
@@ -21,11 +39,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cf_space:
-          - development
-          - staging
-          - prod
-        service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
+        cf_space: ${{ github.event_name != 'workflow_dispatch' && fromJSON('["development","staging","prod"]') || inputs.cf_space == 'all' && fromJSON('["development","staging","prod"]') || fromJSON(format('["{0}"]', inputs.cf_space)) }}
+        service_name: ${{ github.event_name != 'workflow_dispatch' && fromJSON(vars.S3_BACKUP_SERVICE_NAMES) || inputs.service_name == 'all' && fromJSON(vars.S3_BACKUP_SERVICE_NAMES) || fromJSON(format('["{0}"]', inputs.service_name)) }}
     env:
       BACKUP_PREFIX: backup-manager-90-day-retention
       CF_ORG: gsa-datagov
