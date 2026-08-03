@@ -52,3 +52,14 @@ jobs:
           cf_space: ${{ env.CF_SPACE }}
           cf_username: ${{ secrets.CF_SERVICE_USER }}
           cf_password: ${{ secrets.CF_SERVICE_AUTH }}
+
+      - name: show backup-manager logs on failure
+        if: failure()
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          command: |
+            cf logs backup-manager --recent
+          cf_org: ${{ env.CF_ORG }}
+          cf_space: ${{ env.CF_SPACE }}
+          cf_username: ${{ secrets.CF_SERVICE_USER }}
+          cf_password: ${{ secrets.CF_SERVICE_AUTH }}
