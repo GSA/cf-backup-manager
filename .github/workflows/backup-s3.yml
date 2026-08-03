@@ -3,6 +3,24 @@ name: backup-s3
 
 on:
   workflow_dispatch:
+    inputs:
+      cf_space:
+        description: cloud.gov space to back up
+        required: true
+        type: choice
+        options:
+          - all
+          - development
+          - staging
+          - prod
+      service_name:
+        description: S3 service to back up
+        required: true
+        type: choice
+        options:
+          - all
+          - inventory-s3
+          - datagov-catalog-s3
   schedule:
     # Sundays at 07:00 UTC.
     - cron: "0 7 * * 0"
@@ -21,37 +39,32 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        cf_space:
-          - development
-          - staging
-          - prod
-        service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
+        cf_space: ${{ github.event_name != 'workflow_dispatch' && fromJSON('["development","staging","prod"]') || inputs.cf_space == 'all' && fromJSON('["development","staging","prod"]') || fromJSON(format('["{0}"]', inputs.cf_space)) }}
+        service_name: ${{ github.event_name != 'workflow_dispatch' && fromJSON(vars.S3_BACKUP_SERVICE_NAMES) || inputs.service_name == 'all' && fromJSON(vars.S3_BACKUP_SERVICE_NAMES) || fromJSON(format('["{0}"]', inputs.service_name)) }}
     env:
-      BACKUP_PREFIX: backup-manager-v1
+      BACKUP_PREFIX: backup-manager-90-day-retention
+      CF_ORG: gsa-datagov
+      CF_SPACE: ${{ matrix.cf_space }}
+      SERVICE_NAME: ${{ matrix.service_name }}
 
     steps:
-      - name: configure 90 day backup retention
-        uses: usds/cloud-gov-cli@master
-        with:
-          command: >
-            run-task backup-manager
-            --wait
-            --name s3-retention-${{ matrix.service_name }}-${{ github.run_id }}
-            --command "retention 90 ${{ env.BACKUP_PREFIX }}/${{ matrix.cf_space }}/${{ matrix.service_name }}/"
-          org: gsa-datagov
-          space: ${{ matrix.cf_space }}
-          user: ${{ secrets.CF_SERVICE_USER }}
-          password: ${{ secrets.CF_SERVICE_AUTH }}
-
       - name: backup source S3 bucket
-        uses: usds/cloud-gov-cli@master
+        uses: cloud-gov/cg-cli-tools@main
         with:
-          command: >
-            run-task backup-manager
-            --wait
-            --name backup-s3-${{ matrix.service_name }}-${{ github.run_id }}
-            --command "backup s3 ${{ matrix.service_name }}"
-          org: gsa-datagov
-          space: ${{ matrix.cf_space }}
-          user: ${{ secrets.CF_SERVICE_USER }}
-          password: ${{ secrets.CF_SERVICE_AUTH }}
+          command: |
+            cf run-task backup-manager --wait --name "backup-s3-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "backup s3 ${SERVICE_NAME}"
+          cf_org: ${{ env.CF_ORG }}
+          cf_space: ${{ env.CF_SPACE }}
+          cf_username: ${{ secrets.CF_SERVICE_USER }}
+          cf_password: ${{ secrets.CF_SERVICE_AUTH }}
+
+      - name: show backup-manager logs on failure
+        if: failure()
+        uses: cloud-gov/cg-cli-tools@main
+        with:
+          command: |
+            cf logs backup-manager --recent
+          cf_org: ${{ env.CF_ORG }}
+          cf_space: ${{ env.CF_SPACE }}
+          cf_username: ${{ secrets.CF_SERVICE_USER }}
+          cf_password: ${{ secrets.CF_SERVICE_AUTH }}

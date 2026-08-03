@@ -27,7 +27,7 @@ usage: backup <service_type> <service_name> [backup_path]
 
 Environment variables:
 
-  BACKUP_PREFIX: the base prefix for generated backup paths. Defaults to backup-manager-v1.
+  BACKUP_PREFIX: the base prefix for generated backup paths. Defaults to backup-manager-90-day-retention.
   DATASTORE_S3_SERVICE_NAME: the name of the S3 service to store backups.
 
 EOF
@@ -48,7 +48,7 @@ shift
 service_name="$1"
 shift
 
-backup_prefix="${BACKUP_PREFIX:-backup-manager-v1}"
+backup_prefix="${BACKUP_PREFIX:-backup-manager-90-day-retention}"
 backup_prefix="${backup_prefix#/}"
 backup_prefix="${backup_prefix%/}"
 
@@ -68,8 +68,10 @@ backup_path="/${backup_path##/}"
 source $PROJECT_DIR/lib/core.bash
 source $PROJECT_DIR/lib/${service_type}.bash
 
-eval "$(get_datastore_bucket_credentials_env)"
-eval "$(service_get_credentials_env $service_name)"
+datastore_credentials_env="$(get_datastore_bucket_credentials_env)"
+eval "$datastore_credentials_env"
+service_credentials_env="$(service_get_credentials_env "$service_name")"
+eval "$service_credentials_env"
 
 echo "backing up $service_name ($service_type) to $backup_path..."
 if declare -f service_backup_to_datastore > /dev/null; then
