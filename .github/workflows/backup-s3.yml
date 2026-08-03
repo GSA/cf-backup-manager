@@ -27,7 +27,7 @@ jobs:
           - prod
         service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
     env:
-      BACKUP_PREFIX: backup-manager-v1
+      BACKUP_PREFIX: backup-manager-90-day-retention
       CF_ORG: gsa-datagov
       CF_SPACE: ${{ matrix.cf_space }}
       SERVICE_NAME: ${{ matrix.service_name }}

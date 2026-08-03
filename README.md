@@ -8,7 +8,7 @@ See [GSA/datagov-deploy#2768](https://github.com/gsa/datagov-deploy/issues/2768)
 
 The backup-manager runs as a Cloud Foundry application with zero instances. Most backup/restore commands should be run via [Cloud Foundry task](https://docs.cloudfoundry.org/devguide/using-tasks.html).
 
-    $ cf run-task backup-manager --wait --name dashboard-restore --command 'restore mysql dashboard-db /backup-manager-v1/development/dashboard-db/dashboard-db-20211201022504-backup.gz'
+    $ cf run-task backup-manager --wait --name dashboard-restore --command 'restore mysql dashboard-db /backup-manager-90-day-retention/development/dashboard-db/dashboard-db-20211201022504-backup.gz'
 
 Inspect the currently running tasks.
 
@@ -75,7 +75,7 @@ form:
 
 > /$BACKUP_PREFIX/$space/$service_name/$service_name-$datetime-backup.gz
 
-`BACKUP_PREFIX` defaults to `backup-manager-v1`.
+`BACKUP_PREFIX` defaults to `backup-manager-90-day-retention`.
 
 For `s3` services, the backup path is treated as a prefix in the backup bucket.
 Objects from the source bucket are copied under that prefix with their original
@@ -97,7 +97,7 @@ backs up the S3 services listed in the `S3_BACKUP_SERVICE_NAMES` GitHub Actions
 variable in the `development`, `staging`, and `prod` cloud.gov spaces.
 
 The backup-manager S3 bucket must have a 90-day lifecycle expiration rule for
-the `backup-manager-v1/` prefix. This rule is managed outside this app because
+the `backup-manager-90-day-retention/` prefix. This rule is managed outside this app because
 application-bound S3 credentials cannot update bucket lifecycle configuration.
 Any backup written under that prefix expires after 90 days, including manual
 commands that use generated default paths such as `backup s3 inventory-s3` or
@@ -112,7 +112,7 @@ with a JSON array value:
 
     ["inventory-s3","datagov-catalog-s3"]
 
-The workflow uses `BACKUP_PREFIX=backup-manager-v1` for generated backup paths.
+The workflow uses `BACKUP_PREFIX=backup-manager-90-day-retention` for generated backup paths.
 Change that workflow environment value and the app
 `BACKUP_PREFIX` environment variable together if you need a different base
 prefix.
