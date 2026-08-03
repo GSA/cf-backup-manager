@@ -28,30 +28,27 @@ jobs:
         service_name: ${{ fromJSON(vars.S3_BACKUP_SERVICE_NAMES) }}
     env:
       BACKUP_PREFIX: backup-manager-v1
+      CF_ORG: gsa-datagov
+      CF_SPACE: ${{ matrix.cf_space }}
+      SERVICE_NAME: ${{ matrix.service_name }}
 
     steps:
       - name: configure 90 day backup retention
-        uses: usds/cloud-gov-cli@master
+        uses: cloud-gov/cg-cli-tools@main
         with:
-          command: >
-            run-task backup-manager
-            --wait
-            --name s3-retention-${{ matrix.service_name }}-${{ github.run_id }}
-            --command "retention 90 ${{ env.BACKUP_PREFIX }}/${{ matrix.cf_space }}/${{ matrix.service_name }}/"
-          org: gsa-datagov
-          space: ${{ matrix.cf_space }}
-          user: ${{ secrets.CF_SERVICE_USER }}
-          password: ${{ secrets.CF_SERVICE_AUTH }}
+          command: |
+            cf run-task backup-manager --wait --name "s3-retention-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "retention 90 ${BACKUP_PREFIX}/${CF_SPACE}/${SERVICE_NAME}/"
+          cf_org: ${{ env.CF_ORG }}
+          cf_space: ${{ env.CF_SPACE }}
+          cf_username: ${{ secrets.CF_SERVICE_USER }}
+          cf_password: ${{ secrets.CF_SERVICE_AUTH }}
 
       - name: backup source S3 bucket
-        uses: usds/cloud-gov-cli@master
+        uses: cloud-gov/cg-cli-tools@main
         with:
-          command: >
-            run-task backup-manager
-            --wait
-            --name backup-s3-${{ matrix.service_name }}-${{ github.run_id }}
-            --command "backup s3 ${{ matrix.service_name }}"
-          org: gsa-datagov
-          space: ${{ matrix.cf_space }}
-          user: ${{ secrets.CF_SERVICE_USER }}
-          password: ${{ secrets.CF_SERVICE_AUTH }}
+          command: |
+            cf run-task backup-manager --wait --name "backup-s3-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "backup s3 ${SERVICE_NAME}"
+          cf_org: ${{ env.CF_ORG }}
+          cf_space: ${{ env.CF_SPACE }}
+          cf_username: ${{ secrets.CF_SERVICE_USER }}
+          cf_password: ${{ secrets.CF_SERVICE_AUTH }}
