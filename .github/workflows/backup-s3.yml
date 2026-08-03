@@ -33,16 +33,6 @@ jobs:
       SERVICE_NAME: ${{ matrix.service_name }}
 
     steps:
-      - name: configure 90 day backup retention
-        uses: cloud-gov/cg-cli-tools@main
-        with:
-          command: |
-            cf run-task backup-manager --wait --name "s3-retention-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "retention 90 ${BACKUP_PREFIX}/${CF_SPACE}/${SERVICE_NAME}/"
-          cf_org: ${{ env.CF_ORG }}
-          cf_space: ${{ env.CF_SPACE }}
-          cf_username: ${{ secrets.CF_SERVICE_USER }}
-          cf_password: ${{ secrets.CF_SERVICE_AUTH }}
-
       - name: backup source S3 bucket
         uses: cloud-gov/cg-cli-tools@main
         with:
