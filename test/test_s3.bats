@@ -42,6 +42,7 @@ function seed_source_bucket () {
 
   assert_success
   assert_output --partial 'backing up application-s3-test (s3) to /s3-backup...'
+  assert_output --partial 'verified 2 object(s) in s3 backup'
   assert_output --partial 'ok'
 
   run aws_helper s3 cp s3://$TEST_DATASTORE_BUCKET/s3-backup/file.txt -
@@ -60,6 +61,7 @@ function seed_source_bucket () {
 
   assert_success
   assert_output --partial 'backing up application-s3-test (s3) to /custom-backups/development/application-s3-test/application-s3-test-'
+  assert_output --partial 'verified 2 object(s) in s3 backup'
 
   run aws_helper s3 ls s3://$TEST_DATASTORE_BUCKET/custom-backups/development/application-s3-test/ --recursive
 
@@ -72,6 +74,13 @@ function seed_source_bucket () {
 
   assert_failure
   assert_output --partial 'refusing to back up datastore bucket datastore-backup-test'
+}
+
+@test "backup s3 fails when source service is not bound" {
+  run backup s3 missing-s3 /missing-backup
+
+  assert_failure
+  assert_output --partial 'missing-s3 does not exist in vcap_services'
 }
 
 @test "restore s3 application-s3-restore-test" {

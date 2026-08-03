@@ -68,8 +68,10 @@ backup_path="/${backup_path##/}"
 source $PROJECT_DIR/lib/core.bash
 source $PROJECT_DIR/lib/${service_type}.bash
 
-eval "$(get_datastore_bucket_credentials_env)"
-eval "$(service_get_credentials_env $service_name)"
+datastore_credentials_env="$(get_datastore_bucket_credentials_env)"
+eval "$datastore_credentials_env"
+service_credentials_env="$(service_get_credentials_env "$service_name")"
+eval "$service_credentials_env"
 
 echo "backing up $service_name ($service_type) to $backup_path..."
 if declare -f service_backup_to_datastore > /dev/null; then

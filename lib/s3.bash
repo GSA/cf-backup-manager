@@ -29,14 +29,40 @@ function _s3_list_keys () {
     jq -r '.Contents[]?.Key'
 }
 
+function _s3_list_datastore_backup_keys () {
+  local backup_prefix key
+  backup_prefix="$1"
+
+  AWS_ACCESS_KEY_ID="$DATASTORE_BUCKET_ACCESS_KEY_ID" \
+    AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" \
+    AWS_DEFAULT_REGION="$DATASTORE_BUCKET_REGION" \
+    aws_cmd s3api list-objects-v2 \
+      --bucket "$DATASTORE_BUCKET_NAME" \
+      --prefix "${backup_prefix}/" |
+    jq -r '.Contents[]?.Key' |
+    while IFS= read -r key; do
+      [[ -z "$key" ]] && continue
+      echo "${key#${backup_prefix}/}"
+    done
+}
+
+function _s3_tempfile () {
+  mktemp "${BACKUP_MANAGER_TMPDIR:-${TMPDIR:-/tmp}}/backup-manager-s3-keys.XXXXXX"
+}
+
 function service_backup_to_datastore () {
-  local backup_path key backup_prefix
+  local backup_path key backup_prefix source_keys backup_keys object_count
   backup_path="$(_s3_normalize_prefix "$1")"
   backup_prefix="$backup_path"
 
   if [[ "$S3_BUCKET_NAME" == "$DATASTORE_BUCKET_NAME" ]]; then
     fatal "refusing to back up datastore bucket $DATASTORE_BUCKET_NAME"
   fi
+
+  source_keys="$(_s3_tempfile)"
+  backup_keys="$(_s3_tempfile)"
+
+  _s3_list_keys | sort > "$source_keys"
 
   while IFS= read -r key; do
     [[ -z "$key" ]] && continue
@@ -49,7 +75,18 @@ function service_backup_to_datastore () {
         AWS_SECRET_ACCESS_KEY="$DATASTORE_BUCKET_SECRET_ACCESS_KEY" \
         AWS_DEFAULT_REGION="$DATASTORE_BUCKET_REGION" \
         aws_cmd s3 cp - "s3://${DATASTORE_BUCKET_NAME}/${backup_prefix}/${key}"
-  done < <(_s3_list_keys)
+  done < "$source_keys"
+
+  _s3_list_datastore_backup_keys "$backup_prefix" | sort > "$backup_keys"
+
+  if ! cmp -s "$source_keys" "$backup_keys"; then
+    echo "S3 backup verification failed for ${backup_prefix}" >&2
+    diff -u "$source_keys" "$backup_keys" >&2 || true
+    return 1
+  fi
+
+  object_count="$(wc -l < "$source_keys" | tr -d ' ')"
+  echo "verified ${object_count} object(s) in s3 backup"
 }
 
 function service_restore_from_datastore () {
