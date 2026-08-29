@@ -5,22 +5,20 @@ set -o pipefail
 set -o nounset
 
 # Get input params
-# Service name: the name of the service that is hosting the S3 Backup
-# Backup path: the path in S3 that is the backup location
-# Storage size (in GB): minimum 250 for catalog
 space_name=$(cf t | grep "space" | cut -d ':' -f 2 | awk '{$1=$1};1')
+read -rp "App name (inventory|catalog)> " app_name
 
 function wait_for () {
   while ! (cf tasks backup-manager | grep -q "$1 .*SUCCEEDED"); do
-    sleep 5
+    sleep 30
   done
 }
 
 cf set-env backup-manager DATASTORE_S3_SERVICE_NAME backup-manager-s3
 
 backup_id=$$
-backup_path="inventory-db-$(date +%Y%m%d-%H%M%S)-$space_name.gz" 
+backup_path="$app_name-db-$(date +%Y%m%d-%H%M%S)-$space_name.gz" 
 
-cf run-task backup-manager  --name "inventory-db-backup-$backup_id" --command "backup psql inventory-db $backup_path"
+cf run-task backup-manager  --name "$app_name-db-backup-$backup_id" --command "backup psql $app_name-db $backup_path"
 
-wait_for "catalog-db-backup-$backup_id"
+wait_for "$app_name-db-backup-$backup_id"
