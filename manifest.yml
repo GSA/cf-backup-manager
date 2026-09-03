@@ -5,7 +5,7 @@ applications:
     docker:
       image: ghcr.io/gsa/cf-backup-manager:((docker_tag))
     command: sleep infinity
-    memory: 64M
+    memory: 200M
     health-check-type: process
     no-route: true
     no-start: true
