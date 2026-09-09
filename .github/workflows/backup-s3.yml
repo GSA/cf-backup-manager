@@ -52,7 +52,7 @@ jobs:
         uses: cloud-gov/cg-cli-tools@main
         with:
           command: |
-            cf run-task backup-manager --wait --name "backup-s3-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "backup s3 ${SERVICE_NAME}"
+            cf run-task backup-manager -m 1G --wait --name "backup-s3-${SERVICE_NAME}-${GITHUB_RUN_ID}" --command "backup s3 ${SERVICE_NAME}"
           cf_org: ${{ env.CF_ORG }}
           cf_space: ${{ env.CF_SPACE }}
           cf_username: ${{ secrets.CF_SERVICE_USER }}
