@@ -53,7 +53,7 @@ EOF
 
 # Restore backup
 restore_id=$$
-time cf run-task backup-manager --name "catalog-restore-$restore_id" --command "PG_RESTORE_OPTIONS='--no-acl' restore psql $catalog_db_migrate $backup_path"
+time cf run-task backup-manager --name "catalog-restore-$restore_id" --command "PG_RESTORE_OPTIONS='--if-exists --clean --no-acl' restore psql $catalog_db_migrate $backup_path"
 
 # This job may return "FAILED", and may not return successfully
 wait_for "catalog-restore-$restore_id"
